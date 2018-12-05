@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PostSubmitTurnRoute.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.ui</a> &gt; <span class="el_source">PostSubmitTurnRoute.java</span></div><h1>PostSubmitTurnRoute.java</h1><pre class="source lang-java linenums">package com.webcheckers.ui;
+
+import com.google.gson.Gson;
+import com.webcheckers.appl.GameCenter;
+import com.webcheckers.model.*;
+import com.webcheckers.model.CheckerGame.GameWinner;
+
+import spark.*;
+
+import java.util.logging.Logger;
+
+/**
+ * This action submits the player's turn. The Submit turn button will
+ * only be active when the Game View is in the Stable Turn state.
+ *
+ * The response body must be a message that has type info if the turn, as a whole,
+ * is valid and the server has processed the turn. At this point the GameView stops
+ * and refreshes the page by re-requesting the GET /game URL.
+ *
+ * The server must return an error message if the turn is invalid with a
+ * text message explaining why the turn is invalid. For example, if the player
+ * takes a single move turn but that player has a jump turn somewhere else that
+ * single move is not a valid turn. The player needs to take the jump instead;
+ * so the GameView returns to the Stable Turn state and the player must then backup
+ * the single move and take a jump turn. A similar situation arises after a player
+ * makes a jump move and the moved piece is in position
+ * to make another jump which must be made.
+ */
+public class PostSubmitTurnRoute implements Route {
+<span class="fc" id="L30">    private static final Logger LOG = Logger.getLogger(GetGameRoute.class.getName());</span>
+
+    private Gson gson;
+    private GameCenter center;
+
+    /**
+     * constructor
+     * @param gson
+     * @param center
+     */
+    public PostSubmitTurnRoute(Gson gson, GameCenter center)
+<span class="fc" id="L41">    {</span>
+<span class="fc" id="L42">        this.gson = gson;</span>
+<span class="fc" id="L43">        this.center = center;</span>
+<span class="fc" id="L44">    }</span>
+
+    @Override
+    public Object handle(Request request, Response response) throws Exception {
+<span class="fc" id="L48">        LOG.finer(&quot;PostSubmitTurnRoute is invoked.&quot;);</span>
+
+<span class="fc" id="L50">        final Session session = request.session();</span>
+<span class="fc" id="L51">        Player currentPlayer = session.attribute(WebServer.PLAYER_SESSION_KEY);</span>
+<span class="fc" id="L52">        CheckerGame game = center.getGameByID(currentPlayer.getGameID());</span>
+<span class="nc" id="L53">        Message submitMessage = game.submitTurn();</span>
+<span class="nc" id="L54">        return gson.toJson(submitMessage);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

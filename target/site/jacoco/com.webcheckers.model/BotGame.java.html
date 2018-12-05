@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BotGame.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.model</a> &gt; <span class="el_source">BotGame.java</span></div><h1>BotGame.java</h1><pre class="source lang-java linenums">package com.webcheckers.model;
+
+import java.util.HashSet;
+import com.webcheckers.model.Board.Enums.*;
+
+/**
+ * A modified CheckerGame, which handles the case when a 
+ * player plays against a bot
+ */
+public class BotGame extends CheckerGame {
+
+    public BotGame(Player pl1, Player pl2){
+<span class="fc" id="L13">        super(pl1, pl2);</span>
+<span class="fc bfc" id="L14" title="All 2 branches covered.">        if(pl1.isBot())</span>
+<span class="fc" id="L15">            botMove();</span>
+
+<span class="fc" id="L17">    }</span>
+
+    /**
+     * Randomly takes a move available
+     * Takes repeated jump moves if available
+     */
+    public void botMove(){
+<span class="fc" id="L24">        boolean moved = false;</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        while(playerHasMoves()){</span>
+<span class="fc" id="L26">            moved = true;</span>
+<span class="fc" id="L27">            HashSet&lt;Move&gt; poss = getPossibleMoves();</span>
+<span class="fc" id="L28">            boolean movesAreJumps = jumpMoveAvailable();</span>
+<span class="fc" id="L29">            Object[] possibleMoves = poss.toArray();</span>
+            Move m;
+            do{
+<span class="fc" id="L32">                int x = possibleMoves.length;</span>
+<span class="fc" id="L33">                x = (int)(Math.random() * x);</span>
+<span class="fc" id="L34">                m = (Move)(possibleMoves[x]);</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">            }while(m.validateMove(poss, movesAreJumps).getType() != MessageType.info);</span>
+<span class="fc" id="L36">            pushMove(m);</span>
+<span class="fc" id="L37">        }</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        if(moved){</span>
+<span class="fc" id="L39">            submitTurn();</span>
+        }
+        else{
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">            if(currentPlayer == redPlayer){</span>
+<span class="nc" id="L43">                setWinner(GameWinner.white);</span>
+            }
+            else{
+<span class="fc" id="L46">                setWinner(GameWinner.red);</span>
+            }
+        }
+        
+<span class="fc" id="L50">    }</span>
+
+    /**
+     * modified switch turn, which calls the botMove() function when the player
+     * is done.
+     */
+    public void switchCurrentTurn()
+    {
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if(currentPlayer == redPlayer) {</span>
+<span class="fc" id="L59">            currentPlayer = whitePlayer;</span>
+<span class="fc" id="L60">            activeColor = Color.WHITE;</span>
+        }
+        else {
+<span class="fc" id="L63">            currentPlayer = redPlayer;</span>
+<span class="fc" id="L64">            activeColor = Color.RED;</span>
+        }
+<span class="fc" id="L66">        validator.switchActivePlayer();</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if(currentPlayer.isBot()){</span>
+<span class="fc" id="L68">            botMove();</span>
+        }
+<span class="fc" id="L70">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

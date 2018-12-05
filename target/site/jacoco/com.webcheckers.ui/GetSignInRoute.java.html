@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GetSignInRoute.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.ui</a> &gt; <span class="el_source">GetSignInRoute.java</span></div><h1>GetSignInRoute.java</h1><pre class="source lang-java linenums">package com.webcheckers.ui;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Logger;
+
+import com.webcheckers.appl.PlayerLobby;
+
+import spark.ModelAndView;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.TemplateEngine;
+
+/**
+ * The UI Controller to GET the SignIn page.
+ */
+public class GetSignInRoute implements Route {
+
+<span class="fc" id="L21">    private static final Logger LOG = Logger.getLogger(GetSignInRoute.class.getName());</span>
+    private final TemplateEngine templateEngine;
+    
+    public static final String VIEWFILE = &quot;signin.ftl&quot;;
+    public static final String TITLE = &quot;Sign In&quot;;
+
+    /**
+     * Create the Spark Route (UI controller) for the
+     * {@code GET/} HTTP request
+     *
+     * @param templateEngine the HTML template rendering engine
+     */
+<span class="fc" id="L33">    public GetSignInRoute(final TemplateEngine templateEngine) {</span>
+        //validation
+<span class="fc" id="L35">        Objects.requireNonNull(templateEngine, &quot;templateEngine must not be null&quot;);</span>
+        //
+<span class="fc" id="L37">        this.templateEngine = templateEngine;</span>
+        //
+<span class="fc" id="L39">        LOG.config(&quot;GetSignInRoute is initialized.&quot;);</span>
+
+<span class="fc" id="L41">    }</span>
+
+    /**
+     * Render the WebCheckers SignIn page.
+     *
+     * @param request - the HTTP request
+     * @param response - the HTTP response
+     * @return the rendered HTML for the SignIn page
+     */
+    public Object handle(Request request, Response response) {
+<span class="fc" id="L51">        LOG.finer(&quot;GetSignInRoute is invoked.&quot;);</span>
+
+<span class="fc" id="L53">        Map&lt;String, Object&gt; vm = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L54">        vm.put(GetHomeRoute.TITLE_KEY, TITLE);</span>
+<span class="fc" id="L55">        return templateEngine.render(new ModelAndView(vm, VIEWFILE));</span>
+    }
+    
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

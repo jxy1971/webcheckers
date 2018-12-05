@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PostResignRoute.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.ui</a> &gt; <span class="el_source">PostResignRoute.java</span></div><h1>PostResignRoute.java</h1><pre class="source lang-java linenums">package com.webcheckers.ui;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Logger;
+
+import com.google.gson.Gson;
+
+import com.webcheckers.model.Player;
+import com.webcheckers.appl.GameCenter;
+import com.webcheckers.appl.PlayerLobby;
+import com.webcheckers.ui.WebServer;
+import com.webcheckers.model.CheckerGame;
+import com.webcheckers.model.Message;
+import com.webcheckers.model.MessageType;
+
+import spark.*;
+import static spark.Spark.halt;
+
+/**
+ * The UI Controller to Post the Resign request.
+ */
+public class PostResignRoute implements Route {
+
+<span class="fc" id="L26">    private static final Logger LOG = Logger.getLogger(PostSignInRoute.class.getName());</span>
+    private Gson gson;
+    private GameCenter center;
+
+    //private final PlayerLobby playerLobby;
+    //private final TemplateEngine templateEngine;
+
+    /**
+     * Creates a new route for resignation
+     * @param playerLobby the lobby storing player info
+     * @param templateEngine The templete rendering engine for freemarker templates
+     */
+<span class="fc" id="L38">    public PostResignRoute(Gson gson, GameCenter center) {</span>
+        /*Objects.requireNonNull(playerLobby, &quot;playerlobby must not be null&quot;);
+        Objects.requireNonNull(templateEngine, &quot;templateEngine must not be null&quot;);
+        this.templateEngine = templateEngine;
+        this.playerLobby = playerLobby;*/
+<span class="fc" id="L43">        this.center = center;</span>
+<span class="fc" id="L44">        this.gson = gson;</span>
+<span class="fc" id="L45">        LOG.config(&quot;PostResignRoute is initialized.&quot;);</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * Handle the request to resign
+     *
+     * @param request - the HTTP request
+     * @param response - the HTTP response
+     * @return the rendered HTML home page
+     */
+    public Object handle(Request request, Response response) {
+<span class="fc" id="L56">        LOG.finer(&quot;PostResignRoute is invoked.&quot;);</span>
+
+<span class="fc" id="L58">        final Session session = request.session();</span>
+        
+<span class="fc" id="L60">        Player current = session.attribute(WebServer.PLAYER_SESSION_KEY);</span>
+<span class="fc" id="L61">        CheckerGame game = center.getGameByID(current.getGameID());</span>
+<span class="fc" id="L62">        Player opponent = game.getOpponent(current);</span>
+
+<span class="fc" id="L64">        current.setStateWaiting();</span>
+<span class="fc" id="L65">        game.playerResigned(current);</span>
+
+<span class="fc" id="L67">        Message m = new Message(&quot;You have resigned&quot;, MessageType.info);</span>
+
+<span class="fc" id="L69">        return gson.toJson(m);</span>
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

@@ -1,0 +1,679 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MoveValidator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.model.Board</a> &gt; <span class="el_source">MoveValidator.java</span></div><h1>MoveValidator.java</h1><pre class="source lang-java linenums">package com.webcheckers.model.Board;
+
+
+import com.webcheckers.model.Board.Enums.Color;
+import com.webcheckers.model.Board.Enums.Type;
+import com.webcheckers.model.Move;
+import com.webcheckers.model.Position;
+
+import java.util.*;
+
+public class MoveValidator {
+    private BoardView board;
+    public boolean isRedPlayer;
+    private HashSet&lt;Move&gt; simpleMoves;
+    private HashSet&lt;Move&gt; jumpMoves;
+
+    public MoveValidator(BoardView board, boolean isRed)
+<span class="fc" id="L18">    {</span>
+<span class="fc" id="L19">        this.board = board;</span>
+<span class="fc" id="L20">        this.isRedPlayer = isRed;</span>
+<span class="fc" id="L21">        simpleMoves = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L22">        jumpMoves = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L23">    }</span>
+
+    /**
+     * Checks to see if a player is able to move or jump
+     * @return Whether or not the player is able to move or jump
+     */
+    public boolean genAllPossibleMoves() {
+<span class="fc" id="L30">        simpleMoves.clear();</span>
+<span class="fc" id="L31">        jumpMoves.clear();</span>
+<span class="fc" id="L32">        ArrayList&lt;Row&gt; rows = board.getBoardArray();</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if(isRedPlayer){</span>
+<span class="fc" id="L34">            return genAllPossibleMovesRed(rows);</span>
+        }
+        else{
+<span class="fc" id="L37">            return genAllPossibleMovesWhite(rows);</span>
+        }
+    }
+
+    /**
+     * Sub-method of genAllPossiblesMoves that is called when it is red player's turn
+     * Branches out to other methods
+     * @param rows ArrayList representation of the current state of the game board
+     * @return Whether or not the player is able to move or jump
+     */
+    private boolean genAllPossibleMovesRed(ArrayList&lt;Row&gt; rows){
+<span class="fc" id="L48">        Space redSpace = null;</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        for (int i = 7; i &gt;= 0; i--) {</span>
+<span class="fc" id="L50">            Row row = rows.get(i);</span>
+<span class="fc" id="L51">            Row ckrow = null;</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">            if (i-1&gt;=0) {</span>
+<span class="fc" id="L53">                ckrow = rows.get(i - 1);</span>
+            }
+<span class="fc" id="L55">            Row kingckrow = null;</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">            if(i+1&lt;=7){</span>
+<span class="fc" id="L57">                kingckrow = rows.get(i+1);</span>
+            }
+
+<span class="fc bfc" id="L60" title="All 2 branches covered.">            for (int j = 0; j &lt; 8; j++) {</span>
+<span class="fc bfc" id="L61" title="All 6 branches covered.">                if (row.getSpace(j).isColored() &amp;&amp; row.getSpace(j).getPiece() != null &amp;&amp; row.getSpace(j).getPiece().getColor() == Color.RED) {</span>
+<span class="fc" id="L62">                    redSpace = row.getSpace(j);</span>
+                } else {
+<span class="fc" id="L64">                    redSpace = null;</span>
+                }
+<span class="fc bfc" id="L66" title="All 2 branches covered.">                if (redSpace != null) {</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">                    if (j - 1 &gt;= 0) {</span>
+<span class="fc" id="L68">                        genAllPossibleMovesRedMinus(i,j,ckrow,kingckrow,redSpace,rows);</span>
+                    }
+<span class="fc bfc" id="L70" title="All 2 branches covered.">                    if (j + 1 &lt;= 7) {</span>
+<span class="fc" id="L71">                        genAllPossibleMovesRedPlus(i,j,ckrow,kingckrow,redSpace,rows);</span>
+                    }
+                }
+            }
+        }
+<span class="pc bpc" id="L76" title="1 of 4 branches missed.">        return !simpleMoves.isEmpty() || !jumpMoves.isEmpty();</span>
+    }
+
+    /**
+     * Sub-Method of genAllPossibleMovesRed that is called if a red player piece
+     * has the possibility of being able to move to space cell-1
+     * @param i The row index
+     * @param j The cell index
+     * @param ckrow The row in front of the space
+     * @param kingckrow The row behind the space
+     * @param redSpace The space in question
+     * @param rows ArrayList representation of the current state of the game board
+     */
+    private void genAllPossibleMovesRedMinus(int i, int j, Row ckrow, Row kingckrow, Space redSpace, ArrayList&lt;Row&gt; rows){
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (ckrow != null) {</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">            if (ckrow.getSpace(j - 1).getPiece() == null) {</span>
+<span class="fc" id="L92">                simpleMoves.add(new Move(new Position(i, j), new Position(i - 1, j - 1)));</span>
+<span class="fc bfc" id="L93" title="All 6 branches covered.">            } else if (ckrow.getSpace(j - 1).getPiece().getColor() == Color.WHITE &amp;&amp; i - 2 &gt;= 0 &amp;&amp; j - 2 &gt;= 0) {</span>
+<span class="fc" id="L94">                Space ckJumpSpace = rows.get(i - 2).getSpace(j - 2);</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">                if (ckJumpSpace.getPiece() == null) {</span>
+<span class="fc" id="L96">                    jumpMoves.add(new Move(new Position(i, j), new Position(i - 2, j - 2)));</span>
+                }
+            }
+        }
+<span class="pc bpc" id="L100" title="1 of 4 branches missed.">        if(redSpace.getPiece().getType()==Type.KING &amp;&amp; kingckrow != null){</span>
+<span class="fc" id="L101">            genAllPossibleMovesRedMinusKing(i,j,kingckrow,rows);</span>
+        }
+<span class="fc" id="L103">    }</span>
+
+    /**
+     * Sub-Method of genAllPossibleMovesRedMinus that is called if a red player piece
+     * is king and has the possibility of being able to move to space cell-1
+     * @param i The row index
+     * @param j The cell index
+     * @param kingckrow The row behind the space
+     * @param rows ArrayList representation of the current state of the game board
+     */
+    private void genAllPossibleMovesRedMinusKing(int i, int j, Row kingckrow, ArrayList&lt;Row&gt; rows){
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        if(kingckrow.getSpace(j - 1).getPiece() == null){</span>
+<span class="fc" id="L115">            simpleMoves.add(new Move(new Position(i, j), new Position(i + 1, j - 1)));</span>
+<span class="pc bpc" id="L116" title="2 of 6 branches missed.">        } else if (kingckrow.getSpace(j-1).getPiece().getColor() == Color.WHITE &amp;&amp; i + 2 &lt;= 7 &amp;&amp; j - 2 &gt;= 0){</span>
+<span class="fc" id="L117">            Space kingckJumpSpace = rows.get(i + 2).getSpace(j-2);</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">            if (kingckJumpSpace.getPiece() == null){</span>
+<span class="fc" id="L119">                jumpMoves.add(new Move(new Position(i,j),new Position(i+2,j-2)));</span>
+            }
+        }
+<span class="fc" id="L122">    }</span>
+
+    /**
+     * Sub-Method of genAllPossibleMovesRed that is called if a red player piece
+     * has the possibility of being able to move to space cell+1
+     * @param i The row index
+     * @param j The cell index
+     * @param ckrow The row in front of the space
+     * @param kingckrow The row behind the space
+     * @param redSpace The space in question
+     * @param rows ArrayList representation of the current state of the game board
+     */
+    private void genAllPossibleMovesRedPlus(int i, int j, Row ckrow, Row kingckrow, Space redSpace, ArrayList&lt;Row&gt; rows){
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        if(ckrow != null) {</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">            if (ckrow.getSpace(j + 1).getPiece() == null) {</span>
+<span class="fc" id="L137">                simpleMoves.add(new Move(new Position(i, j), new Position(i - 1, j + 1)));</span>
+<span class="fc bfc" id="L138" title="All 6 branches covered.">            } else if (ckrow.getSpace(j + 1).getPiece().getColor() == Color.WHITE &amp;&amp; i - 2 &gt;= 0 &amp;&amp; j + 2 &lt;= 7) {</span>
+<span class="fc" id="L139">                Space ckJumpSpace = rows.get(i - 2).getSpace(j + 2);</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">                if (ckJumpSpace.getPiece() == null) {</span>
+<span class="fc" id="L141">                    jumpMoves.add(new Move(new Position(i, j), new Position(i - 2, j + 2)));</span>
+                }
+            }
+        }
+<span class="pc bpc" id="L145" title="1 of 4 branches missed.">        if(redSpace.getPiece().getType()==Type.KING &amp;&amp; kingckrow !=null){</span>
+<span class="fc" id="L146">            genAllPossibleMovesRedPlusKing(i,j,kingckrow,rows);</span>
+        }
+<span class="fc" id="L148">    }</span>
+
+    /**
+     * Sub-Method of genAllPossibleMovesRedPlus that is called if a red player piece
+     * is king and has the possibility of being able to move to space cell+1
+     * @param i The row index
+     * @param j The cell index
+     * @param kingckrow The row behind the space
+     * @param rows ArrayList representation of the current state of the game board
+     */
+    private void genAllPossibleMovesRedPlusKing(int i, int j, Row kingckrow, ArrayList&lt;Row&gt; rows){
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (kingckrow.getSpace(j + 1).getPiece() == null) {</span>
+<span class="fc" id="L160">            simpleMoves.add(new Move(new Position(i, j), new Position(i + 1, j + 1)));</span>
+<span class="pc bpc" id="L161" title="1 of 6 branches missed.">        } else if (kingckrow.getSpace(j+1).getPiece().getColor() == Color.WHITE &amp;&amp; i + 2 &lt;= 7 &amp;&amp; j + 2 &lt;= 7){</span>
+<span class="fc" id="L162">            Space kingckJumpSpace = rows.get(i + 2).getSpace(j+2);</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">            if (kingckJumpSpace.getPiece() == null){</span>
+<span class="fc" id="L164">                jumpMoves.add(new Move(new Position(i,j),new Position(i+2,j+2)));</span>
+            }
+        }
+<span class="fc" id="L167">    }</span>
+
+    /**
+     * Sub-method of genAllPossiblesMoves that is called when it is white player's turn
+     * Branches out to other methods
+     * @param rows ArrayList representation of the current state of the game board
+     * @return Whether or not the player is able to move or jump
+     */
+    private boolean genAllPossibleMovesWhite(ArrayList&lt;Row&gt; rows) {
+<span class="fc" id="L176">        Space whiteSpace = null;</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        for (int i = 0; i &lt;= 7; i++) {</span>
+<span class="fc" id="L178">            Row row = rows.get(i);</span>
+<span class="fc" id="L179">            Row ckrow = null;</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">            if (i+1&lt;=7) {</span>
+<span class="fc" id="L181">                ckrow = rows.get(i + 1);</span>
+            }
+<span class="fc" id="L183">            Row kingckrow = null;</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">            if(i-1&gt;=0){</span>
+<span class="fc" id="L185">                kingckrow = rows.get(i-1);</span>
+            }
+<span class="fc bfc" id="L187" title="All 2 branches covered.">            for (int j = 0; j &lt; 8; j++) {</span>
+<span class="fc bfc" id="L188" title="All 6 branches covered.">                if (row.getSpace(j).isColored() &amp;&amp; row.getSpace(j).getPiece() != null &amp;&amp; row.getSpace(j).getPiece().getColor() == Color.WHITE) {</span>
+<span class="fc" id="L189">                    whiteSpace = row.getSpace(j);</span>
+                } else {
+<span class="fc" id="L191">                    whiteSpace = null;</span>
+                }
+<span class="fc bfc" id="L193" title="All 2 branches covered.">                if (whiteSpace != null) {</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">                    if (j - 1 &gt;= 0) {</span>
+<span class="fc" id="L195">                        genAllPossibleMovesWhiteMinus(i,j,ckrow,kingckrow,whiteSpace,rows);</span>
+                    }
+<span class="fc bfc" id="L197" title="All 2 branches covered.">                    if (j + 1 &lt;= 7) {</span>
+<span class="fc" id="L198">                        genAllPossibleMovesWhitePlus(i,j,ckrow,kingckrow,whiteSpace,rows);</span>
+                    }
+                }
+            }
+        }
+<span class="fc bfc" id="L203" title="All 4 branches covered.">        return !simpleMoves.isEmpty() || !jumpMoves.isEmpty();</span>
+    }
+
+    /**
+     * Sub-Method of genAllPossibleMovesWhite that is called if a white player piece
+     * has the possibility of being able to move to space cell-1
+     * @param i The row index
+     * @param j The cell index
+     * @param ckrow The row in front of the space
+     * @param kingckrow The row behind the space
+     * @param whiteSpace The space in question
+     * @param rows ArrayList representation of the current state of the game board
+     */
+    private void genAllPossibleMovesWhiteMinus(int i, int j, Row ckrow, Row kingckrow, Space whiteSpace, ArrayList&lt;Row&gt; rows){
+<span class="fc bfc" id="L217" title="All 2 branches covered.">        if(ckrow != null) {</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">            if (ckrow.getSpace(j - 1).getPiece() == null) {</span>
+<span class="fc" id="L219">                simpleMoves.add(new Move(new Position(7 - i, 7 - j), new Position(7 - i - 1, 7 - j + 1)));</span>
+<span class="fc bfc" id="L220" title="All 6 branches covered.">            } else if (ckrow.getSpace(j - 1).getPiece().getColor() == Color.RED &amp;&amp; i + 2 &lt;= 7 &amp;&amp; j - 2 &gt;= 0) {</span>
+<span class="fc" id="L221">                Space ckJumpSpace = rows.get(i + 2).getSpace(j - 2);</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">                if (ckJumpSpace.getPiece() == null) {</span>
+<span class="fc" id="L223">                    jumpMoves.add(new Move(new Position(7 - i, 7 - j), new Position(7 - i - 2, 7 - j + 2)));</span>
+                }
+            }
+        }
+<span class="pc bpc" id="L227" title="1 of 4 branches missed.">        if(whiteSpace.getPiece().getType()==Type.KING &amp;&amp; kingckrow != null){</span>
+<span class="fc" id="L228">            genAllPossibleMovesWhiteMinusKing(i,j,kingckrow,rows);</span>
+        }
+<span class="fc" id="L230">    }</span>
+
+    /**
+     * Sub-Method of genAllPossibleMovesWhiteMinus that is called if a white player piece
+     * is king and has the possibility of being able to move to space cell-1
+     * @param i The row index
+     * @param j The cell index
+     * @param kingckrow The row behind the space
+     * @param rows ArrayList representation of the current state of the game board
+     */
+    private void genAllPossibleMovesWhiteMinusKing(int i, int j, Row kingckrow, ArrayList&lt;Row&gt; rows){
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        if(kingckrow.getSpace(j - 1).getPiece() == null){</span>
+<span class="fc" id="L242">            simpleMoves.add(new Move(new Position(7 - i, 7 - j), new Position(7 - i + 1, 7 - j + 1)));</span>
+<span class="pc bpc" id="L243" title="3 of 6 branches missed.">        } else if (kingckrow.getSpace(j-1).getPiece().getColor() == Color.RED &amp;&amp; i - 2 &gt;= 0 &amp;&amp; j - 2 &gt;= 0){</span>
+<span class="fc" id="L244">            Space kingckJumpSpace = rows.get(i - 2).getSpace(j-2);</span>
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">            if (kingckJumpSpace.getPiece() == null){</span>
+<span class="fc" id="L246">                jumpMoves.add(new Move(new Position(7-i,7-j),new Position(7-i+2,7-j+2)));</span>
+            }
+        }
+<span class="fc" id="L249">    }</span>
+
+    /**
+     * Sub-Method of genAllPossibleMovesWhite that is called if a white player piece
+     * has the possibility of being able to move to space cell+1
+     * @param i The row index
+     * @param j The cell index
+     * @param ckrow The row in front of the space
+     * @param kingckrow The row behind the space
+     * @param whiteSpace The space in question
+     * @param rows ArrayList representation of the current state of the game board
+     */
+    private void genAllPossibleMovesWhitePlus(int i, int j, Row ckrow, Row kingckrow, Space whiteSpace, ArrayList&lt;Row&gt; rows){
+<span class="fc bfc" id="L262" title="All 2 branches covered.">        if(ckrow != null){</span>
+<span class="fc bfc" id="L263" title="All 2 branches covered.">            if (ckrow.getSpace(j + 1).getPiece() == null) {</span>
+<span class="fc" id="L264">                simpleMoves.add(new Move(new Position(7 - i, 7 - j), new Position(7 - i - 1, 7 - j - 1)));</span>
+<span class="pc bpc" id="L265" title="2 of 6 branches missed.">            } else if (ckrow.getSpace(j + 1).getPiece().getColor() == Color.RED &amp;&amp; i + 2 &lt;= 7 &amp;&amp; j + 2 &lt;= 7) {</span>
+<span class="fc" id="L266">                Space ckJumpSpace = rows.get(i + 2).getSpace(j + 2);</span>
+<span class="fc bfc" id="L267" title="All 2 branches covered.">                if (ckJumpSpace.getPiece() == null) {</span>
+<span class="fc" id="L268">                    jumpMoves.add(new Move(new Position(7 - i, 7 - j), new Position(7 - i - 2, 7 - j - 2)));</span>
+                }
+            }
+        }
+<span class="pc bpc" id="L272" title="1 of 4 branches missed.">        if(whiteSpace.getPiece().getType()==Type.KING &amp;&amp; kingckrow != null){</span>
+<span class="fc" id="L273">            genAllPossibleMovesWhitePlusKing(i,j,kingckrow,rows);</span>
+        }
+<span class="fc" id="L275">    }</span>
+
+    /**
+     * Sub-Method of genAllPossibleMovesWhitePlus that is called if a white player piece
+     * is king and has the possibility of being able to move to space cell+1
+     * @param i The row index
+     * @param j The cell index
+     * @param kingckrow The row behind the space
+     * @param rows ArrayList representation of the current state of the game board
+     */
+    private void genAllPossibleMovesWhitePlusKing(int i, int j, Row kingckrow, ArrayList&lt;Row&gt; rows){
+<span class="fc bfc" id="L286" title="All 2 branches covered.">        if(kingckrow.getSpace(j + 1).getPiece() == null){</span>
+<span class="fc" id="L287">            simpleMoves.add(new Move(new Position(7 - i, 7 - j), new Position(7 - i + 1, 7 - j - 1)));</span>
+<span class="pc bpc" id="L288" title="3 of 6 branches missed.">        } else if (kingckrow.getSpace(j+1).getPiece().getColor() == Color.RED &amp;&amp; i - 2 &gt;= 0 &amp;&amp; j + 2 &lt;= 7){</span>
+<span class="fc" id="L289">            Space kingckJumpSpace = rows.get(i - 2).getSpace(j+2);</span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">            if (kingckJumpSpace.getPiece() == null){</span>
+<span class="fc" id="L291">                jumpMoves.add(new Move(new Position(7-i,7-j),new Position(7-i+2,7-j-2)));</span>
+            }
+        }
+<span class="fc" id="L294">    }</span>
+
+    /**
+     * Gets the possible jumps a piece of a certain position can take
+     * @param pos The position of the piece in question
+     * @param isKing Whether or not the piece is king
+     * @param cantReturn ArrayList of positions the piece cannot jump back to.
+     * @return whether or not there are any possible jumps for the piece
+     */
+    public boolean getPossibleJumpsOnPosition(Position pos, Boolean isKing, ArrayList&lt;Position&gt; cantReturn) {
+<span class="fc" id="L304">        simpleMoves.clear();</span>
+<span class="fc" id="L305">        jumpMoves.clear();</span>
+<span class="fc" id="L306">        ArrayList&lt;Row&gt; rows = board.getBoardArray();</span>
+<span class="fc bfc" id="L307" title="All 2 branches covered.">        if(isRedPlayer){</span>
+<span class="fc" id="L308">            return getPossibleJumpsOnPositionRed(rows,pos,isKing, cantReturn);</span>
+        }
+        else{
+<span class="fc" id="L311">            return getPossibleJumpsOnPositionWhite(rows,pos, isKing, cantReturn);</span>
+        }
+    }
+
+    /**
+     * Sub-method of getPossibleJumpsOnPosition that is called when the piece given
+     * was the red player's.
+     * @param rows ArrayList representation of the current state of the game board
+     * @param pos The position of the piece in question
+     * @param isKing Whether or not the piece is king
+     * @param cantReturn ArrayList of positions the piece cannot jump back to
+     * @return whether or not there are any possible jumps for the piece
+     */
+    private boolean getPossibleJumpsOnPositionRed(ArrayList&lt;Row&gt; rows, Position pos, boolean isKing,ArrayList&lt;Position&gt; cantReturn){
+<span class="fc" id="L325">        boolean noAdd = false;</span>
+<span class="fc" id="L326">        int row = pos.getRow();</span>
+<span class="fc" id="L327">        int cell = pos.getCell();</span>
+<span class="fc bfc" id="L328" title="All 2 branches covered.">        if (cell - 1 &gt;= 0) {</span>
+<span class="fc" id="L329">            getPossibleJumpsOnPositionRedMinus(row,cell,pos,rows,cantReturn,noAdd,isKing);</span>
+<span class="fc" id="L330">            noAdd = false;</span>
+        }
+<span class="fc bfc" id="L332" title="All 2 branches covered.">        if (cell + 1 &lt;= 7) {</span>
+<span class="fc" id="L333">            getPossibleJumpsOnPositionRedPlus(row,cell,pos,rows,cantReturn,noAdd,isKing);</span>
+        }
+
+<span class="fc bfc" id="L336" title="All 2 branches covered.">        return !jumpMoves.isEmpty();</span>
+    }
+
+    /**
+     * Sub-method of getPossibleHumpsOnPositionRed that is called when the piece given
+     * has the possibility of moving onto a space at cell-1
+     * @param row The row of the piece
+     * @param cell The cell of the piece
+     * @param pos The position of the piece
+     * @param rows ArrayList representation of the current state of the game board
+     * @param cantReturn ArrayList of positions the piece cannot jump back to
+     * @param noAdd Whether or not a possible position can be added to jumpMoves
+     * @param isKing Whether or not the piece is king
+     */
+    private void getPossibleJumpsOnPositionRedMinus(int row,int cell, Position pos, ArrayList&lt;Row&gt; rows, ArrayList&lt;Position&gt; cantReturn, boolean noAdd, boolean isKing){
+<span class="pc bpc" id="L351" title="1 of 2 branches missed.">        if (row - 1 &gt;= 0) {</span>
+<span class="fc bfc" id="L352" title="All 2 branches covered.">            if (rows.get(row - 1).getSpace(cell - 1).getPiece() != null) {</span>
+<span class="pc bpc" id="L353" title="3 of 6 branches missed.">                if (row - 2 &gt;= 0 &amp;&amp; cell - 2 &gt;= 0 &amp;&amp; rows.get(row - 1).getSpace(cell - 1).getPiece().getColor() == Color.WHITE) {</span>
+<span class="fc bfc" id="L354" title="All 2 branches covered.">                    if (rows.get(row - 2).getSpace(cell - 2).getPiece() == null) {</span>
+<span class="fc bfc" id="L355" title="All 2 branches covered.">                        if(cantReturn!=null) {</span>
+<span class="fc bfc" id="L356" title="All 2 branches covered.">                            for (Position ck: cantReturn) {</span>
+<span class="fc bfc" id="L357" title="All 4 branches covered.">                                if (ck.getRow()==row-2 &amp;&amp; ck.getCell()==cell-2) {</span>
+<span class="fc" id="L358">                                    noAdd = true;</span>
+                                }
+<span class="fc" id="L360">                            }</span>
+                        }
+<span class="fc bfc" id="L362" title="All 2 branches covered.">                        if(!noAdd) {</span>
+<span class="fc" id="L363">                            jumpMoves.add(new Move(pos, new Position(row - 2, cell - 2)));</span>
+                        }
+<span class="fc" id="L365">                        noAdd = false;</span>
+                    }
+                }
+            }
+        }
+<span class="fc bfc" id="L370" title="All 2 branches covered.">        if(isKing){</span>
+<span class="fc" id="L371">            getPossibleJumpsOnPositionRedMinusKing(row,cell,pos,rows,cantReturn,noAdd);</span>
+        }
+<span class="fc" id="L373">    }</span>
+
+    /**
+     * Sub-method of getPossibleJumpsOnPositionRedMinus that is called when the piece given
+     * is a king
+     * @param row The row of the piece
+     * @param cell The cell of the piece
+     * @param pos The position of the piece
+     * @param rows ArrayList representation of the current state of the game board
+     * @param cantReturn ArrayList of positions the piece cannot jump back to
+     * @param noAdd Whether or not a possible position can be added to jumpMoves
+     */
+    private void getPossibleJumpsOnPositionRedMinusKing(int row,int cell, Position pos, ArrayList&lt;Row&gt; rows, ArrayList&lt;Position&gt; cantReturn, boolean noAdd){
+<span class="pc bpc" id="L386" title="1 of 2 branches missed.">        if (row + 1 &lt;= 7) {</span>
+<span class="pc bpc" id="L387" title="1 of 4 branches missed.">            if (row + 2 &lt;= 7 &amp;&amp; cell - 2 &gt;= 0 &amp;&amp;</span>
+<span class="pc bpc" id="L388" title="1 of 2 branches missed.">                    rows.get(row + 1).getSpace(cell - 1).getPiece() != null) {</span>
+<span class="fc bfc" id="L389" title="All 2 branches covered.">                if (rows.get(row + 1).getSpace(cell - 1).getPiece().getColor() == Color.WHITE &amp;&amp;</span>
+<span class="fc bfc" id="L390" title="All 2 branches covered.">                        rows.get(row + 2).getSpace(cell - 2).getPiece() == null) {</span>
+<span class="fc bfc" id="L391" title="All 2 branches covered.">                    if(cantReturn!=null) {</span>
+<span class="fc bfc" id="L392" title="All 2 branches covered.">                        for (Position ck: cantReturn) {</span>
+<span class="fc bfc" id="L393" title="All 4 branches covered.">                            if (ck.getRow()==row+2 &amp;&amp; ck.getCell()==cell-2) {</span>
+<span class="fc" id="L394">                                noAdd = true;</span>
+                            }
+<span class="fc" id="L396">                        }</span>
+                    }
+<span class="fc bfc" id="L398" title="All 2 branches covered.">                    if(!noAdd) {</span>
+<span class="fc" id="L399">                        jumpMoves.add(new Move(pos, new Position(row + 2, cell - 2)));</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L404">    }</span>
+
+    /**
+     * Sub-method of getPossibleHumpsOnPositionRed that is called when the piece given
+     * has the possibility of moving onto a space at cell+1
+     * @param row The row of the piece
+     * @param cell The cell of the piece
+     * @param pos The position of the piece
+     * @param rows ArrayList representation of the current state of the game board
+     * @param cantReturn ArrayList of positions the piece cannot jump back to
+     * @param noAdd Whether or not a possible position can be added to jumpMoves
+     * @param isKing Whether or not the piece is king
+     */
+    private void getPossibleJumpsOnPositionRedPlus(int row,int cell, Position pos, ArrayList&lt;Row&gt; rows, ArrayList&lt;Position&gt; cantReturn, boolean noAdd, boolean isKing){
+<span class="pc bpc" id="L418" title="1 of 2 branches missed.">        if (row - 1 &gt;= 0) {</span>
+<span class="fc bfc" id="L419" title="All 2 branches covered.">            if (rows.get(row - 1).getSpace(cell + 1).getPiece() != null) {</span>
+<span class="pc bpc" id="L420" title="1 of 4 branches missed.">                if ((row - 2 &gt;= 0 &amp;&amp; cell + 2 &lt;= 7) &amp;&amp;</span>
+<span class="fc bfc" id="L421" title="All 2 branches covered.">                        rows.get(row - 1).getSpace(cell + 1).getPiece().getColor() == Color.WHITE) {</span>
+<span class="fc bfc" id="L422" title="All 2 branches covered.">                    if (rows.get(row - 2).getSpace(cell + 2).getPiece() == null) {</span>
+<span class="fc bfc" id="L423" title="All 2 branches covered.">                        if(cantReturn!=null) {</span>
+<span class="fc bfc" id="L424" title="All 2 branches covered.">                            for (Position ck: cantReturn) {</span>
+<span class="fc bfc" id="L425" title="All 4 branches covered.">                                if (ck.getRow()==row-2 &amp;&amp; ck.getCell()==cell+2) {</span>
+<span class="fc" id="L426">                                    noAdd = true;</span>
+                                }
+<span class="fc" id="L428">                            }</span>
+                        }
+<span class="fc bfc" id="L430" title="All 2 branches covered.">                        if(!noAdd) {</span>
+<span class="fc" id="L431">                            jumpMoves.add(new Move(pos, new Position(row - 2, cell + 2)));</span>
+                        }
+<span class="fc" id="L433">                        noAdd = false;</span>
+                    }
+                }
+            }
+        }
+<span class="fc bfc" id="L438" title="All 2 branches covered.">        if(isKing){</span>
+<span class="fc" id="L439">            getPossibleJumpsOnPositionRedPlusKing(row,cell,pos,rows,cantReturn,noAdd);</span>
+        }
+<span class="fc" id="L441">    }</span>
+
+    /**
+     * Sub-method of getPossibleJumpsOnPositionRedPlus that is called when the piece given
+     * is a king
+     * @param row The row of the piece
+     * @param cell The cell of the piece
+     * @param pos The position of the piece
+     * @param rows ArrayList representation of the current state of the game board
+     * @param cantReturn ArrayList of positions the piece cannot jump back to
+     * @param noAdd Whether or not a possible position can be added to jumpMoves
+     */
+    private void getPossibleJumpsOnPositionRedPlusKing(int row,int cell, Position pos, ArrayList&lt;Row&gt; rows, ArrayList&lt;Position&gt; cantReturn, boolean noAdd){
+<span class="pc bpc" id="L454" title="1 of 2 branches missed.">        if (row + 1 &lt;= 7) {</span>
+<span class="fc bfc" id="L455" title="All 4 branches covered.">            if (row + 2 &lt;= 7 &amp;&amp; cell + 2 &lt;= 7 &amp;&amp;</span>
+<span class="fc bfc" id="L456" title="All 2 branches covered.">                    rows.get(row + 1).getSpace(cell + 1).getPiece() != null) {</span>
+<span class="pc bpc" id="L457" title="1 of 2 branches missed.">                if (rows.get(row + 1).getSpace(cell + 1).getPiece().getColor() == Color.WHITE &amp;&amp;</span>
+<span class="pc bpc" id="L458" title="1 of 2 branches missed.">                        rows.get(row + 2).getSpace(cell + 2).getPiece() == null) {</span>
+<span class="fc bfc" id="L459" title="All 2 branches covered.">                    if (cantReturn != null) {</span>
+<span class="fc bfc" id="L460" title="All 2 branches covered.">                        for (Position ck : cantReturn) {</span>
+<span class="fc bfc" id="L461" title="All 4 branches covered.">                            if (ck.getRow() == row + 2 &amp;&amp; ck.getCell() == cell + 2) {</span>
+<span class="fc" id="L462">                                noAdd = true;</span>
+                            }
+<span class="fc" id="L464">                        }</span>
+                    }
+<span class="fc bfc" id="L466" title="All 2 branches covered.">                    if (!noAdd) {</span>
+<span class="fc" id="L467">                        jumpMoves.add(new Move(pos, new Position(row + 2, cell + 2)));</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L472">    }</span>
+
+    /**
+     * Sub-method of getPossibleJumpsOnPosition that is called when the piece given
+     * was the white player's.
+     * @param rows ArrayList representation of the current state of the game board
+     * @param pos The position of the piece in question
+     * @param isKing Whether or not the piece is king
+     * @param cantReturn ArrayList of positions the piece cannot jump back to
+     * @return whether or not there are any possible jumps for the piece
+     */
+    private boolean getPossibleJumpsOnPositionWhite(ArrayList&lt;Row&gt; rows, Position pos, boolean isKing, ArrayList&lt;Position&gt; cantReturn){
+<span class="fc" id="L484">        boolean noAdd = false;</span>
+<span class="fc" id="L485">        int row = pos.getRow();</span>
+<span class="fc" id="L486">        int cell = pos.getCell();</span>
+<span class="pc bpc" id="L487" title="1 of 2 branches missed.">        if (cell - 1 &gt;= 0) {</span>
+<span class="fc" id="L488">            getPossibleJumpsOnPositionWhiteMinus(row,cell,pos,rows,cantReturn,noAdd,isKing);</span>
+<span class="fc" id="L489">            noAdd = false;</span>
+        }
+<span class="fc bfc" id="L491" title="All 2 branches covered.">        if (cell + 1 &lt;= 7) {</span>
+<span class="fc" id="L492">            getPossibleJumpsOnPositionWhitePlus(row,cell,pos,rows,cantReturn,noAdd,isKing);</span>
+        }
+<span class="fc bfc" id="L494" title="All 2 branches covered.">        return !jumpMoves.isEmpty();</span>
+    }
+
+    /**
+     * Sub-method of getPossibleHumpsOnPositionWhite that is called when the piece given
+     * has the possibility of moving onto a space at cell-1
+     * @param row The row of the piece
+     * @param cell The cell of the piece
+     * @param pos The position of the piece
+     * @param rows ArrayList representation of the current state of the game board
+     * @param cantReturn ArrayList of positions the piece cannot jump back to
+     * @param noAdd Whether or not a possible position can be added to jumpMoves
+     * @param isKing Whether or not the piece is king
+     */
+    private void getPossibleJumpsOnPositionWhiteMinus(int row,int cell,Position pos, ArrayList&lt;Row&gt; rows, ArrayList&lt;Position&gt; cantReturn, boolean noAdd, boolean isKing){
+<span class="fc bfc" id="L509" title="All 2 branches covered.">        if (row + 1 &lt;= 7) {</span>
+<span class="fc bfc" id="L510" title="All 2 branches covered.">            if (rows.get(row + 1).getSpace(cell - 1).getPiece() != null) {</span>
+<span class="fc bfc" id="L511" title="All 6 branches covered.">                if (row + 2 &lt;= 7 &amp;&amp; cell - 2 &gt;= 0 &amp;&amp; rows.get(row + 1).getSpace(cell - 1).getPiece().getColor() == Color.RED) {</span>
+<span class="pc bpc" id="L512" title="1 of 2 branches missed.">                    if (rows.get(row + 2).getSpace(cell - 2).getPiece() == null) {</span>
+<span class="fc bfc" id="L513" title="All 2 branches covered.">                        if(cantReturn!=null) {</span>
+<span class="fc bfc" id="L514" title="All 2 branches covered.">                            for (Position ck: cantReturn) {</span>
+<span class="fc bfc" id="L515" title="All 4 branches covered.">                                if (ck.getRow()==row+2 &amp;&amp; ck.getCell()==cell-2) {</span>
+<span class="fc" id="L516">                                    noAdd = true;</span>
+                                }
+<span class="fc" id="L518">                            }</span>
+                        }
+<span class="fc bfc" id="L520" title="All 2 branches covered.">                        if(!noAdd) {</span>
+<span class="fc" id="L521">                            jumpMoves.add(new Move(new Position(7 - row, 7 - cell), new Position(7 - row - 2, 7 - cell + 2)));</span>
+                        }
+<span class="fc" id="L523">                        noAdd = false;</span>
+                    }
+                }
+            }
+        }
+<span class="fc bfc" id="L528" title="All 2 branches covered.">        if(isKing){</span>
+<span class="fc" id="L529">            getPossibleJumpsOnPositionWhitedMinusKing(row,cell,pos,rows,cantReturn,noAdd);</span>
+        }
+<span class="fc" id="L531">    }</span>
+
+    /**
+     * Sub-method of getPossibleJumpsOnPositionWhiteMinus that is called when the piece given
+     * is a king
+     * @param row The row of the piece
+     * @param cell The cell of the piece
+     * @param pos The position of the piece
+     * @param rows ArrayList representation of the current state of the game board
+     * @param cantReturn ArrayList of positions the piece cannot jump back to
+     * @param noAdd Whether or not a possible position can be added to jumpMoves
+     */
+    private void getPossibleJumpsOnPositionWhitedMinusKing(int row,int cell,Position pos, ArrayList&lt;Row&gt; rows, ArrayList&lt;Position&gt; cantReturn, boolean noAdd){
+<span class="pc bpc" id="L544" title="1 of 2 branches missed.">        if (row - 1 &gt;= 0) {</span>
+<span class="pc bpc" id="L545" title="1 of 4 branches missed.">            if (row - 2 &gt;= 0 &amp;&amp; cell - 2 &gt;= 0 &amp;&amp;</span>
+<span class="pc bpc" id="L546" title="1 of 2 branches missed.">                    rows.get(row - 1).getSpace(cell - 1).getPiece() != null) {</span>
+<span class="pc bpc" id="L547" title="1 of 2 branches missed.">                if (rows.get(row - 1).getSpace(cell - 1).getPiece().getColor() == Color.RED &amp;&amp;</span>
+<span class="fc bfc" id="L548" title="All 2 branches covered.">                        rows.get(row - 2).getSpace(cell - 2).getPiece() == null) {</span>
+<span class="fc bfc" id="L549" title="All 2 branches covered.">                    if(cantReturn!=null) {</span>
+<span class="fc bfc" id="L550" title="All 2 branches covered.">                        for (Position ck: cantReturn) {</span>
+<span class="fc bfc" id="L551" title="All 4 branches covered.">                            if (ck.getRow()==row-2 &amp;&amp; ck.getCell()==cell-2) {</span>
+<span class="fc" id="L552">                                noAdd = true;</span>
+                            }
+<span class="fc" id="L554">                        }</span>
+                    }
+<span class="fc bfc" id="L556" title="All 2 branches covered.">                    if(!noAdd) {</span>
+<span class="fc" id="L557">                        jumpMoves.add(new Move(new Position(7 - row, 7 - cell), new Position(7 - row + 2, 7 - cell + 2)));</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L562">    }</span>
+
+    /**
+     * Sub-method of getPossibleHumpsOnPositionWhite that is called when the piece given
+     * has the possibility of moving onto a space at cell+1
+     * @param row The row of the piece
+     * @param cell The cell of the piece
+     * @param pos The position of the piece
+     * @param rows ArrayList representation of the current state of the game board
+     * @param cantReturn ArrayList of positions the piece cannot jump back to
+     * @param noAdd Whether or not a possible position can be added to jumpMoves
+     * @param isKing Whether or not the piece is king
+     */
+    private void getPossibleJumpsOnPositionWhitePlus(int row,int cell, Position pos, ArrayList&lt;Row&gt; rows, ArrayList&lt;Position&gt; cantReturn, boolean noAdd, boolean isKing) {
+<span class="fc bfc" id="L576" title="All 2 branches covered.">        if (row + 1 &lt;= 7) {</span>
+<span class="fc bfc" id="L577" title="All 2 branches covered.">            if (rows.get(row + 1).getSpace(cell + 1).getPiece() != null) {</span>
+<span class="pc bpc" id="L578" title="2 of 6 branches missed.">                if (row + 2 &lt;= 7 &amp;&amp; cell + 2 &lt;= 7 &amp;&amp; rows.get(row + 1).getSpace(cell + 1).getPiece().getColor() == Color.RED) {</span>
+<span class="fc bfc" id="L579" title="All 2 branches covered.">                    if (rows.get(row + 2).getSpace(cell + 2).getPiece() == null) {</span>
+<span class="fc bfc" id="L580" title="All 2 branches covered.">                        if (cantReturn != null) {</span>
+<span class="fc bfc" id="L581" title="All 2 branches covered.">                            for (Position ck : cantReturn) {</span>
+<span class="fc bfc" id="L582" title="All 4 branches covered.">                                if (ck.getRow() == row + 2 &amp;&amp; ck.getCell() == cell + 2) {</span>
+<span class="fc" id="L583">                                    noAdd = true;</span>
+                                }
+<span class="fc" id="L585">                            }</span>
+                        }
+<span class="fc bfc" id="L587" title="All 2 branches covered.">                        if (!noAdd) {</span>
+<span class="fc" id="L588">                            jumpMoves.add(new Move(new Position(7 - row, 7 - cell), new Position(7 - row - 2, 7 - cell - 2)));</span>
+                        }
+<span class="fc" id="L590">                        noAdd = false;</span>
+                    }
+                }
+            }
+        }
+<span class="fc bfc" id="L595" title="All 2 branches covered.">        if (isKing) {</span>
+<span class="fc" id="L596">            getPossibleJumpsOnPositionWhitedPlusKing(row, cell, pos, rows, cantReturn, noAdd);</span>
+        }
+<span class="fc" id="L598">    }</span>
+
+    /**
+     * Sub-method of getPossibleJumpsOnPositionWhitePlus that is called when the piece given
+     * is a king
+     * @param row The row of the piece
+     * @param cell The cell of the piece
+     * @param pos The position of the piece
+     * @param rows ArrayList representation of the current state of the game board
+     * @param cantReturn ArrayList of positions the piece cannot jump back to
+     * @param noAdd Whether or not a possible position can be added to jumpMoves
+     */
+    private void getPossibleJumpsOnPositionWhitedPlusKing(int row,int cell,Position pos, ArrayList&lt;Row&gt; rows, ArrayList&lt;Position&gt; cantReturn, boolean noAdd){
+<span class="pc bpc" id="L611" title="1 of 2 branches missed.">        if (row - 1 &gt;= 0) {</span>
+<span class="pc bpc" id="L612" title="2 of 4 branches missed.">            if (row - 2 &gt;= 0 &amp;&amp; cell + 2 &lt;= 7 &amp;&amp;</span>
+<span class="fc bfc" id="L613" title="All 2 branches covered.">                    rows.get(row - 1).getSpace(cell + 1).getPiece() != null) {</span>
+<span class="pc bpc" id="L614" title="1 of 2 branches missed.">                if (rows.get(row - 1).getSpace(cell + 1).getPiece().getColor() == Color.RED &amp;&amp;</span>
+<span class="pc bpc" id="L615" title="1 of 2 branches missed.">                        rows.get(row - 2).getSpace(cell + 2).getPiece() == null) {</span>
+<span class="fc bfc" id="L616" title="All 2 branches covered.">                    if(cantReturn!=null) {</span>
+<span class="fc bfc" id="L617" title="All 2 branches covered.">                        for (Position ck: cantReturn) {</span>
+<span class="fc bfc" id="L618" title="All 4 branches covered.">                            if (ck.getRow()==row-2 &amp;&amp; ck.getCell()==cell+2) {</span>
+<span class="fc" id="L619">                                noAdd = true;</span>
+                            }
+<span class="fc" id="L621">                        }</span>
+                    }
+<span class="fc bfc" id="L623" title="All 2 branches covered.">                    if(!noAdd) {</span>
+<span class="fc" id="L624">                        jumpMoves.add(new Move(new Position(7 - row, 7 - cell), new Position(7 - row + 2, 7 - cell - 2)));</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L629">    }</span>
+
+    public void printSet()
+    {
+<span class="fc bfc" id="L633" title="All 2 branches covered.">        if(simpleMoves.isEmpty())</span>
+<span class="fc" id="L634">            System.out.println(&quot;No simple moves&quot;);</span>
+        else {
+<span class="fc" id="L636">            System.out.println(&quot;Simple Moves&quot;);</span>
+<span class="fc bfc" id="L637" title="All 2 branches covered.">            for (Move move : simpleMoves)</span>
+<span class="fc" id="L638">                System.out.println(move);</span>
+        }
+<span class="fc bfc" id="L640" title="All 2 branches covered.">        if(jumpMoves.isEmpty())</span>
+<span class="fc" id="L641">            System.out.println(&quot;No jump moves&quot;);</span>
+        else {
+<span class="fc" id="L643">            System.out.println(&quot;Jump Moves&quot;);</span>
+<span class="fc bfc" id="L644" title="All 2 branches covered.">            for (Move move : jumpMoves)</span>
+<span class="fc" id="L645">                System.out.println(move);</span>
+        }
+<span class="fc" id="L647">    }</span>
+
+<span class="fc" id="L649">    public HashSet&lt;Move&gt; getJumpMoves(){return jumpMoves;}</span>
+
+    public boolean hasMoves()
+    {
+<span class="pc bpc" id="L653" title="1 of 4 branches missed.">        return !simpleMoves.isEmpty() || !jumpMoves.isEmpty();</span>
+    }
+
+    public HashSet&lt;Move&gt; getPossibleMoves()
+    {
+<span class="fc bfc" id="L658" title="All 2 branches covered.">        if(jumpMoves.isEmpty())</span>
+<span class="fc" id="L659">            return simpleMoves;</span>
+        else
+<span class="fc" id="L661">            return jumpMoves;</span>
+    }
+
+    public boolean jumpMoveAvailable()
+    {
+<span class="fc bfc" id="L666" title="All 2 branches covered.">        return !jumpMoves.isEmpty();</span>
+    }
+
+    public void switchActivePlayer()
+    {
+<span class="fc" id="L671">        simpleMoves.clear();</span>
+<span class="fc" id="L672">        jumpMoves.clear();</span>
+<span class="fc bfc" id="L673" title="All 2 branches covered.">        if(isRedPlayer)</span>
+<span class="fc" id="L674">            isRedPlayer = false;</span>
+        else
+<span class="fc" id="L676">            isRedPlayer = true;</span>
+<span class="fc" id="L677">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

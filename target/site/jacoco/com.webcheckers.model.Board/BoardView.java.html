@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BoardView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.model.Board</a> &gt; <span class="el_source">BoardView.java</span></div><h1>BoardView.java</h1><pre class="source lang-java linenums">package com.webcheckers.model.Board;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import com.webcheckers.model.Board.Enums.Color;
+import com.webcheckers.model.Board.Enums.Type;
+import com.webcheckers.model.Move;
+import com.webcheckers.model.Position;
+
+/**
+ * Iterable class used to implement rows in game.ftl and main model
+ * for the Checkers Board
+ */
+public class BoardView implements Iterable&lt;Row&gt; {
+    private ArrayList&lt;Row&gt; board;
+
+    /**
+     * default constructor that creates an ArrayList of Row
+     * objects and calls the method to initialize the board
+     */
+<span class="fc" id="L22">    public BoardView() {</span>
+<span class="fc" id="L23">        board = new ArrayList&lt;Row&gt;();</span>
+<span class="fc" id="L24">        this.initBoard();</span>
+<span class="fc" id="L25">    }</span>
+    public ArrayList&lt;Row&gt; getBoard(){
+<span class="fc" id="L27">        return board;</span>
+    }
+
+    /**
+     * other constructor that is used for displaying
+     * proper board configuration for Red player and White player
+     * @param board-original board model
+     */
+<span class="fc" id="L35">    public BoardView(ArrayList&lt;Row&gt; board) {</span>
+<span class="fc" id="L36">        this.board = board;</span>
+<span class="fc" id="L37">    }</span>
+
+    /**
+     * Initializes the board by iterating through every space
+     * and sets its properties and starting piece positions
+     */
+    private void initBoard() {
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        for(int i = 0; i &lt; 8; i++) {</span>
+<span class="fc" id="L45">            board.add(new Row(i));</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            for (int j = 0; j &lt; 8; j++) {</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">                if ((i+j)%2 == 0)</span>
+<span class="fc" id="L48">                    board.get(i).addSpace(new Space(j, false));</span>
+                else
+<span class="fc" id="L50">                    board.get(i).addSpace(new Space(j, true));</span>
+            }
+        }
+
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        for (int i = 0; i &lt; 8; i+=2)</span>
+<span class="fc" id="L55">            board.get(7).getSpace(i).createPiece(Type.SINGLE, Color.RED);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        for (int i = 1; i &lt; 8; i+=2)</span>
+<span class="fc" id="L57">            board.get(6).getSpace(i).createPiece(Type.SINGLE, Color.RED);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        for (int i = 0; i &lt; 8; i+=2)</span>
+<span class="fc" id="L59">            board.get(5).getSpace(i).createPiece(Type.SINGLE, Color.RED);</span>
+        
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        for (int i = 1; i &lt; 8; i+=2)</span>
+<span class="fc" id="L62">            board.get(0).getSpace(i).createPiece(Type.SINGLE, Color.WHITE);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        for (int i = 0; i &lt; 8; i+=2)</span>
+<span class="fc" id="L64">            board.get(1).getSpace(i).createPiece(Type.SINGLE, Color.WHITE);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        for (int i = 1; i &lt; 8; i+=2)</span>
+<span class="fc" id="L66">            board.get(2).getSpace(i).createPiece(Type.SINGLE, Color.WHITE);</span>
+<span class="fc" id="L67">    }</span>
+
+    /**
+     * Gets the version of the Board that is appropriate for the White player
+     * @return new BoardView object
+     */
+    public BoardView getRedPlayerView()
+    {
+<span class="fc" id="L75">        return new BoardView(this.board);</span>
+    }
+
+    /**
+     * Reverses the indexing of original board to display appropriate view for Red player
+     * @return new BoardView object
+     */
+    public BoardView getWhitePlayerView()
+    {
+<span class="fc" id="L84">        ArrayList&lt;Row&gt; tempBoard = new ArrayList&lt;Row&gt;();</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        for (int i = 0; i &lt; 8; i++) {</span>
+<span class="fc" id="L86">            tempBoard.add(i, new Row(i));</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">            for (int j = 0; j &lt; 8; j++) {</span>
+<span class="fc" id="L88">                Space s = this.board.get(7-i).createWhiteSpace(7 - j);</span>
+<span class="fc" id="L89">                tempBoard.get(i).addSpace(s);</span>
+            }
+        }
+<span class="fc" id="L92">        return new BoardView(tempBoard);</span>
+
+    }
+
+    /**
+     * a single Move to move
+     * @param singleMove the move
+     */
+    public void movePiece(Move singleMove) {
+<span class="fc" id="L101">        Position start = singleMove.getStart();</span>
+<span class="fc" id="L102">        Position end = singleMove.getEnd();</span>
+
+<span class="fc" id="L104">        Space initialSpace = board.get(start.getRow()).getSpace(start.getCell());</span>
+<span class="fc" id="L105">        Space finalSpace = board.get(end.getRow()).getSpace(end.getCell());</span>
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if (!finalSpace.isValid()) {</span>
+<span class="fc" id="L108">            System.out.println(finalSpace + &quot; error final invalid&quot;);</span>
+            //return;
+        }
+
+        Piece thisPiece;
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (initialSpace.getPiece() == null) {</span>
+<span class="fc" id="L114">            System.out.println(initialSpace + &quot; error initial invalid&quot;);</span>
+<span class="fc" id="L115">            return;</span>
+        } else
+<span class="fc" id="L117">            thisPiece = initialSpace.getPiece();</span>
+
+<span class="fc" id="L119">        finalSpace.setPiece(thisPiece);</span>
+<span class="fc" id="L120">        initialSpace.removePiece();</span>
+        //Obtain a king
+<span class="fc bfc" id="L122" title="All 6 branches covered.">        if (end.getRow() == 0 &amp;&amp; thisPiece.getType() != Type.KING &amp;&amp; thisPiece.getColor() == Color.RED) {</span>
+<span class="fc" id="L123">            thisPiece.setKing();</span>
+<span class="fc bfc" id="L124" title="All 6 branches covered.">        } else if (end.getRow() == 7 &amp;&amp; thisPiece.getType() != Type.KING &amp;&amp; thisPiece.getColor() == Color.WHITE) {</span>
+<span class="fc" id="L125">            thisPiece.setKing();</span>
+        }
+<span class="fc" id="L127">    }</span>
+
+    /**
+     * removes a piece when it is taken
+     * @param position the position that has the piece
+     */
+    public Piece removeTakenPiece(Position position)
+    {
+<span class="fc" id="L135">        return board.get(position.getRow()).getSpace(position.getCell()).removePiece();</span>
+    }
+
+    /**
+     * places a piece on board
+     * @param position the position where piece is going
+     */
+    public void placeNewPiece(Position position, Piece piece) {
+<span class="fc" id="L143">        board.get(position.getRow()).getSpace(position.getCell()).setPiece(piece);</span>
+<span class="fc" id="L144">    }</span>
+
+    /**
+     * gets a space in a position
+     * @apram position 
+     */
+    public Space getSpace(Position position) {
+<span class="fc" id="L151">        return board.get(position.getRow()).getSpace(position.getCell());</span>
+    }
+    
+    /**
+     * Implementation of hasNext and next iterator functions of this class.
+     * Used for iterating and setting properties of every row by the game.ftl file
+     * @return new Iterator&lt;Row&gt; object
+     */
+    @Override
+    public Iterator&lt;Row&gt; iterator() {
+<span class="fc" id="L161">        return new Iterator&lt;Row&gt;() {</span>
+
+<span class="fc" id="L163">            int indexPosition = 0;</span>
+
+            @Override
+            public boolean hasNext() {
+<span class="fc bfc" id="L167" title="All 2 branches covered.">                if(indexPosition &gt;= board.size())</span>
+<span class="fc" id="L168">                    return false;</span>
+
+<span class="fc" id="L170">                return true;</span>
+            }
+
+            @Override
+            public Row next() {
+<span class="fc" id="L175">                Row val = board.get(indexPosition);</span>
+<span class="fc" id="L176">                indexPosition++;</span>
+<span class="fc" id="L177">                return val;</span>
+            }
+        };
+    }
+
+    /**
+     * Debugging function to make sure underlying code was implemented properly
+     */
+    /*public void printBoard(){
+        for (int i = 0; i &lt; 8; i++) {
+            for (int j = 0; j &lt; 8; j++) {
+                System.out.print(board.get(i).getSpace(j).toString());
+            }
+            System.out.println();
+        }
+    }*/
+
+    public ArrayList&lt;Row&gt; getBoardArray(){
+<span class="fc" id="L195">        return board;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

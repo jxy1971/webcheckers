@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayerLobby.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.appl</a> &gt; <span class="el_source">PlayerLobby.java</span></div><h1>PlayerLobby.java</h1><pre class="source lang-java linenums">package com.webcheckers.appl;
+
+import com.webcheckers.model.Player;
+
+import java.util.ArrayList;
+import java.util.logging.Logger;
+import java.util.regex.*;
+
+
+/**
+ * Class that creates the lobby
+ */
+public class PlayerLobby {
+    public final static String WHITEBOT = &quot;Bot-White&quot;;
+    public final static String REDBOT = &quot;Bot-Red&quot;;
+
+<span class="fc" id="L17">    private final Logger LOG = Logger.getLogger(PlayerLobby.class.getName());</span>
+
+    private ArrayList&lt;Player&gt; players;
+
+<span class="fc" id="L21">    public PlayerLobby(){</span>
+<span class="fc" id="L22">        players = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L23">    }</span>
+
+    /**
+     * Add player into lobby
+     * @param player - player
+     */
+    public void addPlayer(Player player){
+<span class="fc" id="L30">        players.add(player);</span>
+<span class="fc" id="L31">        player.setStateWaiting();</span>
+<span class="fc" id="L32">    }</span>
+
+    /**
+     * Get players in the lobby
+     * @return players
+     */
+    public ArrayList&lt;Player&gt; getPlayers(){
+<span class="fc" id="L39">        return players;</span>
+    }
+
+    /**
+     * Checks if the username already exists
+     * @param userName - name of user
+     * @return true if is taken, false if it isn't
+     */
+    public boolean userNameExists(String userName)
+    {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        for (Player player: players) {</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">            if(player.getName().equals(userName)) {</span>
+<span class="fc" id="L51">                return true;</span>
+            }
+<span class="fc" id="L53">        }</span>
+<span class="fc" id="L54">        return false;</span>
+    }
+
+    /**
+     * Gets and returns a player based on its userName
+     * @param name Name of the player
+     * @return Player
+     */
+    public Player getPlayer(String name) {
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        for (Player player : players) {</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">            if (player.getName().equals(name)) {</span>
+<span class="fc" id="L65">                return player;</span>
+            }
+<span class="fc" id="L67">        }</span>
+<span class="fc" id="L68">        return null;</span>
+    }
+
+    /**
+     * Checks if username has special characters
+     * @param name Name to be checked
+     * @return if name has special characters in it
+     */
+    public boolean hasSpecialCharacter(String name){
+<span class="fc" id="L77">        Pattern p = Pattern.compile(&quot;[^a-zA-Z0-9]&quot;);</span>
+<span class="fc" id="L78">        return p.matcher(name).find();</span>
+    }
+
+    /**
+     * Removes a player from player list given name
+     * @param name name of player
+     */
+    public void removePlayer(String name){
+<span class="fc" id="L86">        players.remove(getPlayer(name));</span>
+<span class="fc" id="L87">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

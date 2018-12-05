@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Row.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.model.Board</a> &gt; <span class="el_source">Row.java</span></div><h1>Row.java</h1><pre class="source lang-java linenums">package com.webcheckers.model.Board;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+/**
+ * Iterable class used to implement spaces in game.ftl
+ */
+public class Row implements Iterable&lt;Space&gt; {
+    private int index;
+    private ArrayList&lt;Space&gt; spaces;
+
+    /**
+     * Constructor that creates a new ArrayList of Space objects
+     * and sets the index of this row
+     * @param index- identifies this particular row
+     */
+    public Row(int index)
+<span class="fc" id="L19">    {</span>
+<span class="fc" id="L20">        this.index = index;</span>
+<span class="fc" id="L21">        spaces = new ArrayList&lt;Space&gt;();</span>
+<span class="fc" id="L22">    }</span>
+
+    /**
+     * Gets the index of this row
+     * @return index- id of this particular row
+     */
+    public int getIndex()
+    {
+<span class="fc" id="L30">        return index;</span>
+    }
+
+    /**
+     * adds a new space to the spaces array
+     * @param newSpace- added space object
+     */
+    public void addSpace(Space newSpace)
+    {
+<span class="fc" id="L39">        spaces.add(newSpace);</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * Using the index of a space within a row return that Space object
+     * @param index- index of the space needed to be returned
+     * @return Space object at index
+     */
+    public Space getSpace(int index) {
+<span class="fc" id="L48">        return spaces.get(index);</span>
+    }
+
+    public Space createWhiteSpace(int index)
+    {
+<span class="fc" id="L53">        Space newSpace = new Space(spaces.get(index));</span>
+<span class="fc" id="L54">        return newSpace;</span>
+    }
+
+    /**
+     * Implementation of hasNext and next iterator functions of this class.
+     * Used for iterating and setting properties of every Space by the game.ftl file
+     * @return new Iterator&lt;Space&gt; object
+     */
+    @Override
+    public Iterator&lt;Space&gt; iterator() {
+<span class="fc" id="L64">        return new Iterator&lt;Space&gt;() {</span>
+
+<span class="fc" id="L66">            int indexPosition = 0;</span>
+
+            @Override
+            public boolean hasNext() {
+<span class="fc bfc" id="L70" title="All 2 branches covered.">                if(indexPosition &gt;= spaces.size())</span>
+<span class="fc" id="L71">                    return false;</span>
+
+<span class="fc" id="L73">                return true;</span>
+            }
+
+            @Override
+            public Space next() {
+<span class="fc" id="L78">                Space val = spaces.get(indexPosition);</span>
+<span class="fc" id="L79">                indexPosition++;</span>
+<span class="fc" id="L80">                return val;</span>
+            }
+
+        };
+    }
+
+    /**
+     * Function used to print useful information about this class's instance
+     * @return formatted String
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L92">        return String.format(&quot;Row: &quot; + index);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

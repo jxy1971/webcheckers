@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Position.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.model</a> &gt; <span class="el_source">Position.java</span></div><h1>Position.java</h1><pre class="source lang-java linenums">package com.webcheckers.model;
+
+/**
+ * coordinates of a cell
+ */
+public class Position {
+    // coordinates
+    private int row, cell;
+
+    /**
+     * constructor
+     * @param row x
+     * @param cell y
+     */
+<span class="fc" id="L15">    public Position(int row, int cell) {</span>
+<span class="fc" id="L16">        this.row = row;</span>
+<span class="fc" id="L17">        this.cell = cell;</span>
+<span class="fc" id="L18">    }</span>
+
+    /**
+     * the row of this position
+     * @return int
+     */
+    public int getRow() {
+<span class="fc" id="L25">        return this.row;</span>
+    }
+
+    /**
+     * the column of this position
+     * @return int
+     */
+    public int getCell() {
+<span class="fc" id="L33">        return this.cell;</span>
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (this == obj)</span>
+<span class="fc" id="L39">            return true;</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (obj == null)</span>
+<span class="fc" id="L41">            return false;</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (getClass() != obj.getClass())</span>
+<span class="fc" id="L43">            return false;</span>
+<span class="fc" id="L44">        Position other = (Position) obj;</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (other.getRow() != this.getRow())</span>
+<span class="fc" id="L46">            return false;</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (other.getCell() != this.getCell())</span>
+<span class="fc" id="L48">            return false;</span>
+<span class="fc" id="L49">        return true;</span>
+    }
+
+    @Override
+    public String toString()
+    {
+<span class="fc" id="L55">        return (&quot;[&quot; + this.getRow() + &quot;,&quot; + this.getCell() + &quot;]&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

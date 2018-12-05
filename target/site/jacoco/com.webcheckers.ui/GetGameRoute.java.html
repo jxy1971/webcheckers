@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GetGameRoute.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.ui</a> &gt; <span class="el_source">GetGameRoute.java</span></div><h1>GetGameRoute.java</h1><pre class="source lang-java linenums">package com.webcheckers.ui;
+
+import static spark.Spark.halt;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Logger;
+
+import com.webcheckers.appl.GameCenter;
+import com.webcheckers.appl.PlayerLobby;
+import com.webcheckers.model.CheckerGame;
+import com.webcheckers.model.CheckerGame.GameWinner;
+import com.webcheckers.model.Message;
+import com.webcheckers.model.MessageType;
+import com.webcheckers.model.Player;
+import com.webcheckers.model.ViewMode;
+import com.webcheckers.model.Board.Enums.Color;
+
+import spark.ModelAndView;
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.Session;
+import spark.TemplateEngine;
+
+/**
+ * The UI Controller to GET the Game page.
+ *
+ * @author &lt;a href='mailto:bdbvse@rit.edu'&gt;Bryan Basham&lt;/a&gt;
+ */
+public class GetGameRoute implements Route {
+<span class="fc" id="L33">  private static final Logger LOG = Logger.getLogger(GetGameRoute.class.getName());</span>
+
+  private final TemplateEngine templateEngine;
+  private PlayerLobby playerLobby;
+  private GameCenter center;
+
+  // variables from game.ftl, used in VM
+  // static final String CURRENTPLAYER_ATTR = &quot;currentPlayer&quot;;
+  static final String VIEW_ATTR = &quot;viewMode&quot;;
+  static final String REDPLAYER_ATTR = &quot;redPlayer&quot;;
+  static final String WHITEPLAYER_ATTR = &quot;whitePlayer&quot;;
+  static final String ACTIVECOLOR_ATTR = &quot;activeColor&quot;;
+  static final String MESSAGE_ATTR = &quot;message&quot;;
+  static final String TITLE_ATTR = &quot;title&quot;;
+  static final String BOARD_ATTR = &quot;board&quot;;
+<span class="fc" id="L48">  static final Message YOU_WIN = new Message(&quot;You Win.&quot;, MessageType.info);</span>
+<span class="fc" id="L49">  static final Message YOU_LOSE = new Message(&quot;You Lose.&quot;, MessageType.error);</span>
+
+  /**
+   * Create the Spark Route (UI controller) for the {@code GET /} HTTP request.
+   *
+   * @param templateEngine the HTML template rendering engine
+   */
+<span class="fc" id="L56">  public GetGameRoute(PlayerLobby playerLobby, GameCenter center, final TemplateEngine templateEngine) {</span>
+    // validation
+<span class="fc" id="L58">    Objects.requireNonNull(templateEngine, &quot;templateEngine must not be null&quot;);</span>
+    //
+<span class="fc" id="L60">    this.templateEngine = templateEngine;</span>
+<span class="fc" id="L61">    this.playerLobby = playerLobby;</span>
+<span class="fc" id="L62">    this.center = center;</span>
+    //
+<span class="fc" id="L64">    LOG.config(&quot;GetHomeRoute is initialized.&quot;);</span>
+<span class="fc" id="L65">  }</span>
+
+  /**
+   * Render the WebCheckers Game page.
+   *
+   * @param request  the HTTP request
+   * @param response the HTTP response
+   *
+   * @return the rendered HTML for the Game page
+   */
+  @Override
+  public Object handle(Request request, Response response) {
+<span class="fc" id="L77">     LOG.finer(&quot;GetGameRoute is invoked.&quot;);</span>
+<span class="fc" id="L78">    Session httpSession = request.session();</span>
+<span class="fc" id="L79">    Map&lt;String, Object&gt; vm = new HashMap&lt;&gt;();</span>
+
+    // Gets current player
+<span class="fc" id="L82">    Player current = httpSession.attribute(WebServer.PLAYER_SESSION_KEY);</span>
+<span class="fc" id="L83">    vm.put(WebServer.PLAYER_SESSION_KEY, current);</span>
+<span class="fc" id="L84">    vm.put(TITLE_ATTR, &quot;Game&quot;);</span>
+
+    // If player is receiving a game
+<span class="fc bfc" id="L87" title="All 2 branches covered.">    if (current.isChallenged()) {</span>
+<span class="fc" id="L88">      current.setStateIngame();</span>
+<span class="fc" id="L89">      httpSession.attribute(&quot;lastGame&quot;, this.center.getGameByID(current.getGameID()));</span>
+<span class="fc" id="L90">      vm.put(VIEW_ATTR, ViewMode.PLAY);</span>
+<span class="fc" id="L91">      vm.put(REDPLAYER_ATTR, this.center.getGameByID(current.getGameID()).getRedPlayer());</span>
+<span class="fc" id="L92">      vm.put(WHITEPLAYER_ATTR, current);</span>
+<span class="fc" id="L93">      vm.put(ACTIVECOLOR_ATTR, Color.RED);</span>
+<span class="fc" id="L94">      vm.put(BOARD_ATTR, this.center.getGameByID(current.getGameID()).getWhiteBoard());</span>
+    }
+
+    // If player is challenging another person
+<span class="fc bfc" id="L98" title="All 2 branches covered.">    else if (current.isWaiting()) {</span>
+<span class="fc" id="L99">      String name = request.queryParams(&quot;id&quot;);</span>
+<span class="fc" id="L100">      Player opponent = playerLobby.getPlayer(name);</span>
+<span class="pc bpc" id="L101" title="2 of 4 branches missed.">      if (opponent == null || !opponent.isWaiting()) {</span>
+<span class="nc" id="L102">        response.redirect(WebServer.HOME_URL + &quot;?error=783&quot;);</span>
+<span class="nc" id="L103">        halt();</span>
+      }
+      // If opponent is AI
+<span class="fc bfc" id="L106" title="All 2 branches covered.">      if (opponent.isBot()) {</span>
+<span class="fc" id="L107">        current.setStateIngame();</span>
+        // Challenging Red Bot
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        if (opponent.getName().equals(playerLobby.REDBOT)) {</span>
+<span class="fc" id="L110">          this.center.createNewBotGame(opponent, current, current);</span>
+<span class="fc" id="L111">          httpSession.attribute(&quot;lastGame&quot;, this.center.getGameByID(current.getGameID()));</span>
+<span class="fc" id="L112">          vm.put(REDPLAYER_ATTR, opponent);</span>
+<span class="fc" id="L113">          vm.put(WHITEPLAYER_ATTR, current);</span>
+<span class="fc" id="L114">          vm.put(BOARD_ATTR, this.center.getGameByID(current.getGameID()).getWhiteBoard());</span>
+        } else { //Challenging White Bot
+<span class="fc" id="L116">          this.center.createNewBotGame(current, opponent, current);</span>
+<span class="fc" id="L117">          httpSession.attribute(&quot;lastGame&quot;, this.center.getGameByID(current.getGameID()));</span>
+<span class="fc" id="L118">          vm.put(REDPLAYER_ATTR, current);</span>
+<span class="fc" id="L119">          vm.put(WHITEPLAYER_ATTR, opponent);</span>
+<span class="fc" id="L120">          vm.put(BOARD_ATTR, this.center.getGameByID(current.getGameID()).getRedBoard());</span>
+        }
+<span class="fc" id="L122">        vm.put(VIEW_ATTR, ViewMode.PLAY);</span>
+<span class="fc" id="L123">        vm.put(ACTIVECOLOR_ATTR, Color.RED);</span>
+
+<span class="fc" id="L125">        return templateEngine.render(new ModelAndView(vm, &quot;game.ftl&quot;));</span>
+      }
+
+<span class="fc" id="L128">      current.setStateIngame();</span>
+<span class="fc" id="L129">      opponent.setStateChallenged();</span>
+<span class="fc" id="L130">      this.center.createNewGame(current, opponent);</span>
+<span class="fc" id="L131">      current.setGameID(current.getName());</span>
+<span class="fc" id="L132">      opponent.setGameID(current.getName());</span>
+<span class="fc" id="L133">      httpSession.attribute(&quot;lastGame&quot;, this.center.getGameByID(current.getGameID()));</span>
+<span class="fc" id="L134">      vm.put(VIEW_ATTR, ViewMode.PLAY);</span>
+<span class="fc" id="L135">      vm.put(REDPLAYER_ATTR, current);</span>
+<span class="fc" id="L136">      vm.put(WHITEPLAYER_ATTR, opponent);</span>
+<span class="fc" id="L137">      vm.put(ACTIVECOLOR_ATTR, Color.RED);</span>
+<span class="fc" id="L138">      vm.put(BOARD_ATTR, this.center.getGameByID(current.getGameID()).getRedBoard());</span>
+<span class="fc" id="L139">    }</span>
+    // both players are in a game together
+    else {
+<span class="fc" id="L142">      CheckerGame game = center.getGameByID(current.getGameID());</span>
+<span class="fc" id="L143">      vm.put(VIEW_ATTR, ViewMode.PLAY);</span>
+<span class="fc" id="L144">      vm.put(REDPLAYER_ATTR, game.getRedPlayer());</span>
+<span class="fc" id="L145">      vm.put(WHITEPLAYER_ATTR, game.getWhitePlayer());</span>
+<span class="fc" id="L146">      vm.put(ACTIVECOLOR_ATTR, game.getActiveColor());</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">      if (current == game.getRedPlayer())</span>
+<span class="fc" id="L148">        vm.put(BOARD_ATTR, game.getRedBoard());</span>
+      else
+<span class="fc" id="L150">        vm.put(BOARD_ATTR, game.getWhiteBoard());</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">      if (game.getWinner() != GameWinner.ingame) {</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        if(game.getWinner() == GameWinner.red){</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">          if(game.getRedPlayer() == current){</span>
+<span class="fc" id="L154">            vm.put(MESSAGE_ATTR, YOU_WIN);</span>
+          }
+          else{
+<span class="fc" id="L157">            vm.put(MESSAGE_ATTR, YOU_LOSE);</span>
+          }
+        }
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">        else if(game.getWinner() == GameWinner.white){</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">          if(game.getWhitePlayer() == current){</span>
+<span class="fc" id="L162">            vm.put(MESSAGE_ATTR, YOU_WIN);</span>
+          }
+          else{
+<span class="fc" id="L165">            vm.put(MESSAGE_ATTR, YOU_LOSE);</span>
+          }
+        }
+      }
+    }
+
+<span class="fc" id="L171">    return templateEngine.render(new ModelAndView(vm, &quot;game.ftl&quot;));</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

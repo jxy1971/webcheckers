@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Space.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.model.Board</a> &gt; <span class="el_source">Space.java</span></div><h1>Space.java</h1><pre class="source lang-java linenums">package com.webcheckers.model.Board;
+
+import com.webcheckers.model.Board.Enums.Color;
+import com.webcheckers.model.Board.Enums.Type;
+
+/**
+ * An object representing a space on the board
+ */
+public class Space {
+    
+    /**
+     * the index of the cell
+     */
+    private int cellIdx;
+
+    /**
+     * the piece at this space
+     */
+    private Piece piece;
+
+    /**
+     * if this space is a colored space
+     */
+    private boolean isColored;
+
+    public Space(int cellIndex, boolean isColored)
+<span class="fc" id="L27">    {</span>
+<span class="fc" id="L28">        this.cellIdx = cellIndex;</span>
+<span class="fc" id="L29">        this.isColored = isColored;</span>
+<span class="fc" id="L30">    }</span>
+
+    public Space(Space originalSpace)
+<span class="fc" id="L33">    {</span>
+<span class="fc" id="L34">        cellIdx = 7 - originalSpace.getCellIdx();</span>
+<span class="fc" id="L35">        isColored = originalSpace.isColored;</span>
+<span class="fc" id="L36">        this.piece = originalSpace.getPiece();</span>
+<span class="fc" id="L37">    }</span>
+
+    /**
+     * 
+     * @return cell index
+     */
+    public int getCellIdx()
+    {
+<span class="fc" id="L45">        return cellIdx;</span>
+    }
+
+    /**
+     * 
+     * @return if the space is valid for a piece
+     */
+    public boolean isValid()
+    {
+<span class="fc bfc" id="L54" title="All 4 branches covered.">        return (isColored &amp;&amp; piece == null);</span>
+    }
+
+    /**
+     * Create Piece
+     *
+     * @param type if a piece is a king or regular
+     * @param color the color of the piece
+     */
+    public void createPiece(Type type, Color color)
+    {
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if(this.piece == null)</span>
+<span class="fc" id="L66">            this.piece = new Piece(type, color);</span>
+<span class="fc" id="L67">    }</span>
+
+    /**
+     * @return the piece at this space
+     */
+    public Piece getPiece()
+    {
+<span class="fc" id="L74">        return this.piece;</span>
+    }
+
+    /**
+     * 
+     * @param newPiece the piece to put on this space
+     */
+    public void setPiece(Piece newPiece) {
+<span class="fc" id="L82">        this.piece = newPiece;</span>
+<span class="fc" id="L83">    }</span>
+
+    /**
+     * removes the piece on the space
+     */
+    public Piece removePiece()
+    {
+<span class="fc" id="L90">        Piece ret = this.piece;</span>
+<span class="fc" id="L91">        this.piece = null;</span>
+<span class="fc" id="L92">        return ret;</span>
+    }
+
+
+    @Override
+    public String toString() {
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if(this.piece != null){</span>
+<span class="fc" id="L99">            return String.format(&quot; Space: &quot; + cellIdx + &quot; Piece: &quot; + this.piece.getType());</span>
+        }
+        else{
+<span class="fc" id="L102">            return String.format(&quot; Space: &quot; + cellIdx + &quot; Piece: NONE&quot;);</span>
+        }
+    }
+
+<span class="fc" id="L106">    public boolean isColored(){return isColored;}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

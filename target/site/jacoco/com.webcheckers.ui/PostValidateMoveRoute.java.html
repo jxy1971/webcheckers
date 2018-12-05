@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PostValidateMoveRoute.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.ui</a> &gt; <span class="el_source">PostValidateMoveRoute.java</span></div><h1>PostValidateMoveRoute.java</h1><pre class="source lang-java linenums">package com.webcheckers.ui;
+
+import com.google.gson.Gson;
+import com.webcheckers.appl.GameCenter;
+import com.webcheckers.model.*;
+import spark.*;
+
+import java.util.logging.Logger;
+
+/**
+ * This action submits a single move for a player to be validated.
+ * The server must keep track of each proposed move for a single turn in the user's game state.
+ * The response body must be a message that has type info if the move is valid or error if
+ * it is invalid. The text of the message must tell the user why a move is invalid.
+ */
+public class PostValidateMoveRoute implements Route {
+<span class="fc" id="L17">    private static final Logger LOG = Logger.getLogger(GetGameRoute.class.getName());</span>
+
+    private Gson gson;
+    private GameCenter center;
+
+    /**
+     * constructor
+     * @param gson
+     * @param center
+     */
+    public PostValidateMoveRoute(Gson gson, GameCenter center)
+<span class="fc" id="L28">    {</span>
+<span class="fc" id="L29">        this.gson = gson;</span>
+<span class="fc" id="L30">        this.center = center;</span>
+<span class="fc" id="L31">    }</span>
+    
+    @Override
+    public Object handle(Request request, Response response) throws Exception {
+<span class="fc" id="L35">        LOG.finer(&quot;PostValidateMoveRoute is invoked.&quot;);</span>
+
+<span class="fc" id="L37">        final Session session = request.session();</span>
+<span class="fc" id="L38">        Player currentPlayer = session.attribute(WebServer.PLAYER_SESSION_KEY);</span>
+<span class="fc" id="L39">        CheckerGame game = center.getGameByID(currentPlayer.getGameID());</span>
+        Message moveMessage;
+
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if(!game.playerHasMoves())</span>
+        {
+<span class="fc" id="L44">            moveMessage = new Message(&quot;You are out of moves&quot;, MessageType.error);</span>
+<span class="fc" id="L45">            return gson.toJson(moveMessage);</span>
+        }
+
+        //get move from gson
+<span class="fc" id="L49">        final String moveMade = request.body();</span>
+<span class="fc" id="L50">        final Move move = gson.fromJson(moveMade, Move.class);</span>
+
+        // check if move is valid
+<span class="fc" id="L53">        moveMessage = move.validateMove(game.getPossibleMoves(), game.jumpMoveAvailable());</span>
+
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if(moveMessage.getType() == MessageType.info)</span>
+<span class="fc" id="L56">            game.pushMove(move);</span>
+
+<span class="fc" id="L58">        return gson.toJson(moveMessage);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

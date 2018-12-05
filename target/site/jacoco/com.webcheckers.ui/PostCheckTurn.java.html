@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PostCheckTurn.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.ui</a> &gt; <span class="el_source">PostCheckTurn.java</span></div><h1>PostCheckTurn.java</h1><pre class="source lang-java linenums">package com.webcheckers.ui;
+
+import java.util.logging.Logger;
+
+import com.google.gson.Gson;
+import com.webcheckers.appl.GameCenter;
+import com.webcheckers.model.CheckerGame;
+import com.webcheckers.model.Message;
+import com.webcheckers.model.MessageType;
+import com.webcheckers.model.Player;
+import com.webcheckers.model.CheckerGame.GameWinner;
+
+import spark.Request;
+import spark.Response;
+import spark.Route;
+import spark.Session;
+
+/**
+ * This Route Class checks to see if the opponent has submitted their turn.
+ * The HTTP response must return message with type of info and the
+ * text of the message is either true if it's now this players turn
+ * or false if the opponent is still taking their turn.
+ *
+ * If the opponent resigns the game then this Ajax calls must
+ * return an info message with true; and when the
+ * Game View is rendered it must inform this player
+ * that their opponent resigned the game.
+ */
+public class PostCheckTurn implements Route {
+
+<span class="fc" id="L31">    private static final Logger LOG = Logger.getLogger(GetGameRoute.class.getName());</span>
+
+    private Gson gson;
+    private GameCenter center;
+
+    /**
+     * constructor
+     * @param gson
+     * @param center
+     */
+<span class="fc" id="L41">    public PostCheckTurn(Gson gson, GameCenter center){</span>
+<span class="fc" id="L42">        this.gson = gson;</span>
+<span class="fc" id="L43">        this.center = center;</span>
+<span class="fc" id="L44">    }</span>
+
+    @Override
+    public Object handle(Request request, Response response) throws Exception {
+<span class="fc" id="L48">        final Session session = request.session();</span>
+<span class="fc" id="L49">        Player current = session.attribute(WebServer.PLAYER_SESSION_KEY);</span>
+<span class="fc" id="L50">        CheckerGame game = center.getGameByID(current.getGameID());</span>
+<span class="fc" id="L51">        boolean isMyTurn = game.isMyTurn(current);</span>
+<span class="fc" id="L52">        GameWinner winner = game.getWinner();</span>
+
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if(winner == GameWinner.ingame){</span>
+<span class="fc" id="L55">            Message turnMessage = new Message(Boolean.toString(isMyTurn), MessageType.info);</span>
+<span class="fc" id="L56">            return gson.toJson(turnMessage);</span>
+        }
+        else{
+<span class="fc" id="L59">            Message turnMessage = new Message(&quot;true&quot;, MessageType.info);</span>
+<span class="fc" id="L60">            return gson.toJson(turnMessage);</span>
+        }
+        
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>

@@ -1,0 +1,4 @@
+Go over presentation
+submit presentation
+release code including tests and design doc
+

@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CheckerGame.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Web Checkers a'la Spark/Java8</a> &gt; <a href="index.source.html" class="el_package">com.webcheckers.model</a> &gt; <span class="el_source">CheckerGame.java</span></div><h1>CheckerGame.java</h1><pre class="source lang-java linenums">package com.webcheckers.model;
+
+import com.webcheckers.model.Board.*;
+import com.webcheckers.model.Board.Enums.Color;
+import com.webcheckers.model.Board.Enums.Type;
+import com.webcheckers.model.Board.Piece;
+import com.webcheckers.model.Board.Row;
+import com.webcheckers.model.Move;
+
+import java.util.*;
+
+
+import java.util.ArrayList;
+
+import com.webcheckers.model.Board.BoardView;
+
+/*
+ * This class contains the board and will play the game. It takes two Players
+ * and creates a CheckersGame for them to play on
+ *
+ */
+public class CheckerGame
+{
+<span class="fc" id="L24">    public enum GameWinner{</span>
+<span class="fc" id="L25">        red, white, draw, ingame;</span>
+    }
+
+    protected BoardView board;
+    protected Player redPlayer;
+    protected Player whitePlayer;
+    protected Player currentPlayer;
+    protected int numWhite;
+    protected int numRed;
+    protected Color activeColor;
+    protected GameWinner winner;
+    protected ArrayList&lt;ArrayList&lt;Move&gt;&gt; allMoves;
+    protected ArrayList&lt;ArrayList&lt;Piece&gt;&gt; piecesTaken;
+    protected ArrayList&lt;Piece&gt; pieceMoved;
+    public MoveValidator validator;
+    private Boolean multiMove;
+<span class="fc" id="L41">    private ArrayList&lt;Position&gt; cantReturn = new ArrayList&lt;&gt;();</span>
+    private Boolean isKing;
+    private int movectr;
+
+
+
+    /**
+     * Holds all moves made from current player's turn.
+     */
+<span class="fc" id="L50">    protected Stack&lt;Move&gt; moves = new Stack&lt;&gt;();</span>
+
+    /**
+     * Constructor for the CheckerGame class
+     */
+    public CheckerGame(Player redPlayer, Player whitePlayer)
+<span class="fc" id="L56">    {</span>
+<span class="fc" id="L57">        board = new BoardView();</span>
+<span class="fc" id="L58">        this.redPlayer = redPlayer;</span>
+<span class="fc" id="L59">        this.whitePlayer = whitePlayer;</span>
+<span class="fc" id="L60">        this.currentPlayer = redPlayer;</span>
+<span class="fc" id="L61">        this.multiMove = false;</span>
+<span class="fc" id="L62">        activeColor = Color.RED;</span>
+<span class="fc" id="L63">        this.winner = GameWinner.ingame;</span>
+<span class="fc" id="L64">        numWhite =12;</span>
+<span class="fc" id="L65">        numRed  =12;</span>
+<span class="fc" id="L66">        validator = new MoveValidator(board, true);</span>
+<span class="fc" id="L67">        this.allMoves = new ArrayList&lt;ArrayList&lt;Move&gt;&gt;();</span>
+<span class="fc" id="L68">        this.piecesTaken = new ArrayList&lt;ArrayList&lt;Piece&gt;&gt;();</span>
+<span class="fc" id="L69">        this.pieceMoved = new ArrayList&lt;Piece&gt;();</span>
+<span class="fc" id="L70">        this.movectr = 0;</span>
+<span class="fc" id="L71">    }</span>
+
+<span class="fc" id="L73">    public CheckerGame(Player redPlayer, Player whitePlayer, ArrayList&lt;ArrayList&lt;Move&gt;&gt; allMoves, ArrayList&lt;ArrayList&lt;Piece&gt;&gt; piecesTaken, ArrayList&lt;Piece&gt; pieceMoved) {</span>
+<span class="fc" id="L74">        board = new BoardView();</span>
+<span class="fc" id="L75">        this.redPlayer = redPlayer;</span>
+<span class="fc" id="L76">        this.whitePlayer = whitePlayer;</span>
+<span class="fc" id="L77">        this.currentPlayer = redPlayer;</span>
+<span class="fc" id="L78">        this.multiMove = false;</span>
+<span class="fc" id="L79">        activeColor = Color.RED;</span>
+<span class="fc" id="L80">        this.winner = GameWinner.ingame;</span>
+<span class="fc" id="L81">        numWhite = 12;</span>
+<span class="fc" id="L82">        numRed = 12;</span>
+<span class="fc" id="L83">        validator = new MoveValidator(board, true);</span>
+<span class="fc" id="L84">        this.allMoves = allMoves;</span>
+<span class="fc" id="L85">        this.piecesTaken = piecesTaken;</span>
+<span class="fc" id="L86">        this.pieceMoved = pieceMoved;</span>
+<span class="fc" id="L87">        this.movectr = 0;</span>
+<span class="fc" id="L88">    }</span>
+    
+    /**
+     * Returns the board of the CheckerGame
+     *
+     * @return The board of the CheckerGame
+     */
+    public BoardView getBoard() {
+<span class="fc" id="L96">        return board;</span>
+    }
+    /**
+     * Gets RedPlayer's view
+     * @return redPlayer's view
+     */
+    public BoardView getRedBoard() {
+<span class="fc" id="L103">        return board.getRedPlayerView();</span>
+    }
+
+    /**
+     * Gets WhitePlayer's view
+     * @return whitePlayer's view
+     */
+    public BoardView getWhiteBoard() {
+<span class="fc" id="L111">        return board.getWhitePlayerView();</span>
+    }
+
+    public ArrayList&lt;ArrayList&lt;Move&gt;&gt; getAllMoves() {
+<span class="fc" id="L115">        return allMoves;</span>
+    }
+
+    public ArrayList&lt;ArrayList&lt;Piece&gt;&gt; getPiecesTaken() {
+<span class="fc" id="L119">        return piecesTaken;</span>
+    }
+
+    public ArrayList&lt;Piece&gt; getPieceMoved() {
+<span class="fc" id="L123">        return pieceMoved;</span>
+    }
+
+    public int getMoveCtr() {
+<span class="fc" id="L127">        return movectr;</span>
+    }
+    
+    /**
+     * Check if its the players turn
+     * @param player that is playing
+     * @return turn
+     */
+    public boolean isMyTurn(Player player) {
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        return (currentPlayer == player);</span>
+    }
+
+    public Color getActiveColor()
+    {
+<span class="fc" id="L141">        return activeColor;</span>
+    }
+
+    /**
+     * Gets redPlayer
+     * @return redPlayer
+     */
+    public Player getRedPlayer(){
+<span class="fc" id="L149">        return redPlayer;</span>
+    }
+
+    /**
+     * Gets whitePlayer
+     * @return whitePlayer
+     */
+    public Player getWhitePlayer(){
+<span class="fc" id="L157">        return whitePlayer;</span>
+    }
+
+    /**
+     * gets opponent of the given player
+     * @param pl given player
+     * @return the opposing player
+     */
+    public Player getOpponent(Player pl) {
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (pl == this.redPlayer) {</span>
+<span class="fc" id="L167">            return this.whitePlayer;</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        } else if (pl == this.whitePlayer) {</span>
+<span class="fc" id="L169">            return this.redPlayer;</span>
+        } else {
+<span class="fc" id="L171">            return null;</span>
+        }
+    }
+    /**
+     * Checks if White player has remaining pieces
+     * @return white has pieces or not
+     */
+    public Boolean whiteHasPieces(){
+<span class="fc bfc" id="L179" title="All 2 branches covered.">       return numWhite &gt; 0;</span>
+    }
+
+    /**
+     * Checks if Red player has remaining pieces
+     * @return red has pieces or not
+     */
+    public Boolean redHasPieces(){
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        return numRed&gt;0;</span>
+    }
+
+    /**
+     * sets number of white pieces left
+     * @param number
+     */
+    public void setNumWhite(int number){
+<span class="fc" id="L195">        numWhite=number;</span>
+<span class="fc" id="L196">    }</span>
+
+    /**
+     * sets number of red pieces left
+     */
+    public void setNumRed(int number){
+<span class="fc" id="L202">        numRed=number;</span>
+<span class="fc" id="L203">    }</span>
+
+    /**
+     * if a player has no pieces, they lose
+     */
+    public void playerNoPiecesLose(){
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        if (!redHasPieces()){</span>
+<span class="fc" id="L210">            winner=GameWinner.white;</span>
+        }
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        else if (!whiteHasPieces()){</span>
+<span class="fc" id="L213">            winner=GameWinner.red;</span>
+        }
+<span class="fc" id="L215">    }</span>
+
+    /**
+     * player resigned, other player wins
+     * @param pl
+     */
+    public void playerResigned(Player pl){
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        if(pl == this.redPlayer){</span>
+<span class="fc" id="L223">            winner = GameWinner.white;</span>
+        }
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        else if(pl == this.whitePlayer){</span>
+<span class="fc" id="L226">            winner = GameWinner.red;</span>
+        }
+<span class="fc bfc" id="L228" title="All 2 branches covered.">        if(currentPlayer == pl){</span>
+<span class="fc" id="L229">            switchCurrentTurn();</span>
+        }
+<span class="fc" id="L231">    }</span>
+
+    /**
+     * gets the GameWinner status
+     * @return
+     */
+    public GameWinner getWinner() {
+<span class="fc" id="L238">        return winner;</span>
+    }
+
+    /**
+     * sets the status of the GameWinner
+     * @param win
+     */
+    public void setWinner(GameWinner win){
+<span class="fc" id="L246">        this.winner = win;</span>
+<span class="fc" id="L247">    }</span>
+
+    /**
+     * adds a move to the stack of moves
+     * @param newMove
+     */
+    public void pushMove(Move newMove)
+    {
+<span class="fc bfc" id="L255" title="All 2 branches covered.">        if (currentPlayer == whitePlayer)</span>
+<span class="fc" id="L256">            newMove.flipMove();</span>
+
+<span class="fc" id="L258">        moves.push(newMove);</span>
+<span class="fc" id="L259">    }</span>
+
+    /**
+     * returns the stack
+     * @return the stack of moves
+     */
+    public Stack&lt;Move&gt; getMoveStack(){
+<span class="fc" id="L266">        return moves;</span>
+    }
+
+    /**
+     * if the current player still has moves left
+     * @return boolean
+     */
+    public boolean playerHasMoves()
+    {
+        boolean hasMoves;
+        //initial check for valid moves on a turn start
+<span class="fc bfc" id="L277" title="All 2 branches covered.">        if(moves.isEmpty()) {</span>
+<span class="fc" id="L278">            hasMoves = validator.genAllPossibleMoves();    //could make player lose here</span>
+        }
+        //only gets called if a jump move was made to check if another one available
+        else {
+<span class="fc" id="L282">            Move move = moves.peek();</span>
+<span class="fc bfc" id="L283" title="All 2 branches covered.">            if(move.isJump()) {</span>
+<span class="fc" id="L284">                cantReturn.add(move.getEnd());</span>
+<span class="fc" id="L285">                System.out.println(cantReturn);</span>
+<span class="fc bfc" id="L286" title="All 2 branches covered.">                if (!multiMove){</span>
+<span class="fc bfc" id="L287" title="All 2 branches covered.">                    isKing = board.getBoard().get(move.getStart().getRow()).getSpace(move.getStart().getCell()).getPiece().getType() == Type.KING;</span>
+<span class="fc" id="L288">                    multiMove = true;</span>
+                }
+<span class="fc" id="L290">                hasMoves = validator.getPossibleJumpsOnPosition(move.getEnd(), isKing, cantReturn);</span>
+
+            }
+            else
+<span class="fc" id="L294">                hasMoves = false;</span>
+        }
+
+<span class="fc" id="L297">        validator.printSet();</span>
+<span class="fc" id="L298">        return hasMoves;</span>
+    }
+
+    /**
+     * gets all the possible moves for current state of board
+     * @return HashSet
+     */
+    public HashSet&lt;Move&gt; getPossibleMoves()
+    {
+<span class="fc" id="L307">        return validator.getPossibleMoves();</span>
+    }
+
+    public boolean jumpMoveAvailable()
+    {
+<span class="fc" id="L312">        return validator.jumpMoveAvailable();</span>
+    }
+
+    public void switchCurrentTurn()
+    {
+<span class="fc bfc" id="L317" title="All 2 branches covered.">        if(currentPlayer == redPlayer) {</span>
+<span class="fc" id="L318">            currentPlayer = whitePlayer;</span>
+<span class="fc" id="L319">            activeColor = Color.WHITE;</span>
+        }
+        else {
+<span class="fc" id="L322">            currentPlayer = redPlayer;</span>
+<span class="fc" id="L323">            activeColor = Color.RED;</span>
+        }
+<span class="fc" id="L325">        validator.switchActivePlayer();</span>
+<span class="fc" id="L326">    }</span>
+
+    /**
+     * Submits all moves, to take a turn
+     * @return
+     */
+    public Message submitTurn()
+    {
+<span class="fc bfc" id="L334" title="All 2 branches covered.">        if (playerHasMoves()) {</span>
+<span class="fc" id="L335">            return new Message(&quot;Can't submit turn while jump still available&quot;,</span>
+                    MessageType.error);
+        }
+
+        Position finalPos;
+        Position initialPos;
+        try{
+<span class="fc" id="L342">            finalPos = moves.peek().getEnd();</span>
+<span class="fc" id="L343">            initialPos = moves.peek().getStart();</span>
+        }
+<span class="nc" id="L345">        catch(Exception e){</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">            if(currentPlayer == redPlayer){</span>
+<span class="nc" id="L347">                setWinner(GameWinner.white);</span>
+            }
+            else{
+<span class="nc" id="L350">                setWinner(GameWinner.red);</span>
+            }
+<span class="nc" id="L352">            return new Message(&quot;You Win!&quot;, MessageType.info);</span>
+<span class="fc" id="L353">        }</span>
+
+<span class="fc" id="L355">        ArrayList&lt;Move&gt; turn = new ArrayList&lt;Move&gt;();</span>
+<span class="fc" id="L356">        ArrayList&lt;Piece&gt; pieces = new ArrayList&lt;Piece&gt;();</span>
+<span class="fc bfc" id="L357" title="All 2 branches covered.">        while(!moves.empty())</span>
+        {
+<span class="fc" id="L359">            Move curMove = moves.pop();</span>
+<span class="fc" id="L360">            turn.add(0, curMove);</span>
+<span class="fc bfc" id="L361" title="All 2 branches covered.">            if(curMove.isJump())</span>
+            {
+<span class="fc" id="L363">                Position jumpedPos = curMove.getOpponentPiece();</span>
+<span class="fc" id="L364">                System.out.println(&quot;Opponent Piece&quot; + jumpedPos);</span>
+<span class="fc" id="L365">                pieces.add(0,board.removeTakenPiece(jumpedPos));</span>
+<span class="fc bfc" id="L366" title="All 2 branches covered.">                if(activeColor == Color.RED){</span>
+<span class="fc" id="L367">                    numWhite--;</span>
+                }
+                else{
+<span class="fc" id="L370">                    numRed--;</span>
+                }
+<span class="fc" id="L372">                playerNoPiecesLose();</span>
+            }
+
+<span class="fc" id="L375">            initialPos = curMove.getStart();</span>
+<span class="fc" id="L376">        }</span>
+<span class="fc" id="L377">        Move total = new Move(initialPos, finalPos);</span>
+<span class="fc" id="L378">        Piece curPiece = board.getSpace(initialPos).getPiece();</span>
+<span class="fc" id="L379">        Piece newPiece = new Piece(curPiece.getType(), curPiece.getColor());</span>
+<span class="fc" id="L380">        board.movePiece(total);</span>
+<span class="fc" id="L381">        allMoves.add(turn);</span>
+<span class="fc" id="L382">        piecesTaken.add(pieces);</span>
+<span class="fc" id="L383">        pieceMoved.add(newPiece);</span>
+<span class="fc" id="L384">        multiMove = false;</span>
+<span class="fc" id="L385">        cantReturn = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L386">        switchCurrentTurn();</span>
+<span class="fc" id="L387">        return new Message(&quot;All moves submitted&quot;, MessageType.info);</span>
+    }
+
+    public Message nextTurn() {
+        Position finalPos;
+        Position initialPos;
+        
+<span class="fc" id="L394">        ArrayList&lt;Move&gt; turn = allMoves.get(movectr);</span>
+<span class="fc" id="L395">        initialPos = turn.get(0).getStart();</span>
+<span class="fc" id="L396">        finalPos = turn.get(0).getEnd();</span>
+        
+<span class="fc bfc" id="L398" title="All 2 branches covered.">        for (int i = 0; i &lt; turn.size(); i++) {</span>
+<span class="fc" id="L399">            Move curMove = turn.get(i);</span>
+<span class="pc bpc" id="L400" title="1 of 2 branches missed.">            if (curMove.isJump()) {</span>
+<span class="fc" id="L401">                Position jumpedPos = curMove.getOpponentPiece();</span>
+<span class="fc" id="L402">                board.removeTakenPiece(jumpedPos);</span>
+<span class="pc bpc" id="L403" title="1 of 2 branches missed.">                if (activeColor == Color.RED) {</span>
+<span class="nc" id="L404">                    numWhite--;</span>
+                }
+                else {
+<span class="fc" id="L407">                    numRed--;</span>
+                }
+            }
+<span class="fc" id="L410">            finalPos = curMove.getEnd();</span>
+        }
+<span class="fc" id="L412">        Move total = new Move(initialPos, finalPos);</span>
+<span class="fc" id="L413">        System.out.println(total);</span>
+<span class="fc" id="L414">        board.movePiece(total);</span>
+<span class="fc" id="L415">        switchCurrentTurn();</span>
+<span class="fc" id="L416">        movectr++;</span>
+<span class="fc" id="L417">        return new Message(&quot;true&quot;, MessageType.info);</span>
+    }
+
+    public Message previousTurn() {
+        Position finalPos;
+        Position initialPos;
+
+<span class="fc" id="L424">        ArrayList&lt;Move&gt; turn = allMoves.get(movectr-1);</span>
+<span class="fc" id="L425">        ArrayList&lt;Piece&gt; pieces = piecesTaken.get(movectr-1);</span>
+<span class="fc" id="L426">        Piece prevPiece = pieceMoved.get(movectr-1);</span>
+<span class="fc" id="L427">        int last = turn.size()-1;</span>
+<span class="fc" id="L428">        initialPos = turn.get(last).getEnd();</span>
+<span class="fc" id="L429">        finalPos = turn.get(last).getStart();</span>
+
+<span class="fc bfc" id="L431" title="All 2 branches covered.">        for (int i = last; i &gt;= 0; i--) {</span>
+<span class="fc" id="L432">            Move curMove = turn.get(i);</span>
+<span class="pc bpc" id="L433" title="1 of 2 branches missed.">            if (curMove.isJump()) {</span>
+<span class="fc" id="L434">                Position jumpedPos = curMove.getOpponentPiece();</span>
+<span class="fc" id="L435">                board.placeNewPiece(jumpedPos, pieces.get(i));</span>
+            }
+<span class="fc" id="L437">            finalPos = curMove.getStart();</span>
+        }
+<span class="fc" id="L439">        Move total = new Move(initialPos, finalPos);</span>
+<span class="pc bpc" id="L440" title="1 of 2 branches missed.">        if (board.getSpace(initialPos).getPiece().getType() == Type.KING) {</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">            if (pieceMoved.get(movectr-1).getType() == Type.SINGLE) {</span>
+<span class="nc" id="L442">                board.getSpace(initialPos).getPiece().setSingle();</span>
+            }
+        }
+<span class="fc" id="L445">        board.movePiece(total);</span>
+        
+<span class="fc" id="L447">        switchCurrentTurn();</span>
+<span class="fc" id="L448">        movectr--;</span>
+<span class="fc" id="L449">        return new Message(&quot;true&quot;, MessageType.info);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>
